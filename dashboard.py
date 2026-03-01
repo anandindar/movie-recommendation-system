@@ -246,12 +246,12 @@ section.main > div {{
 }}
 
 .welcome-box {{
-    background: linear-gradient(150deg, rgba(6, 9, 18, 0.78) 0%, rgba(9, 12, 24, 0.82) 100%) !important;
-    border: 1px solid rgba(229, 9, 20, 0.55);
+    background: linear-gradient(150deg, rgba(0, 0, 0, 0.88) 0%, rgba(5, 5, 15, 0.90) 100%) !important;
+    border: 2px solid rgba(229, 9, 20, 0.65);
     border-radius: 18px;
-    padding: 20px 20px 14px 20px;
+    padding: 24px 20px 18px 20px;
     margin-bottom: 14px;
-    box-shadow: 0 10px 32px rgba(0, 0, 0, 0.68);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.85), 0 0 20px rgba(229, 9, 20, 0.25);
 }}
 
 /* Remove input wrapper styling */
@@ -422,13 +422,11 @@ div[data-testid="stTextInput"] label span {{
 
 .field-label {{
     color: #ffffff !important;
-    font-size: 22px;
+    font-size: 18px;
     font-weight: 900;
     margin: 8px 0 6px 0;
-    text-shadow:
-        0 1px 10px rgba(0, 0, 0, 1),
-        0 0 12px rgba(255, 255, 255, 0.30),
-        0 0 20px rgba(229, 9, 20, 0.35);
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+    letter-spacing: 0.3px;
 }}
 
 .stButton>button * {{
@@ -580,7 +578,7 @@ if not st.session_state.logged_in:
         st.markdown(background_grid_html, unsafe_allow_html=True)
 
     st.markdown(
-        "<h1 class='header-title' style='text-align:center; margin: 14px 0 18px 0; color:#ffffff !important; -webkit-text-fill-color:#ffffff !important;'><span style='background: linear-gradient(90deg, #e50914 0%, #ff6b6b 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; font-weight: 900; text-shadow: 0 2px 20px rgba(229, 9, 20, 0.8); color: #ffffff !important; -webkit-text-fill-color: #ffffff !important;'>🎬 MOVIES RECOMMENDATION SYSTEM 🎬</span></h1>",
+        "<h1 class='header-title' style='text-align:center; margin: 14px 0 18px 0; color:#ffffff !important; -webkit-text-fill-color:#ffffff !important; font-size: 48px; font-weight: 900; letter-spacing: 2px; text-shadow: 0 3px 15px rgba(0, 0, 0, 1), 0 0 20px rgba(229, 9, 20, 0.8);'>🎬 MOVIES RECOMMENDATION SYSTEM 🎬</h1>",
         unsafe_allow_html=True
     )
 
@@ -590,14 +588,14 @@ if not st.session_state.logged_in:
         st.markdown("<div class='login-box'>", unsafe_allow_html=True)
         st.markdown("""
         <div class='welcome-box'>
-            <h1 class='login-title' style='text-align:center; color:#ffffff !important; -webkit-text-fill-color:#ffffff !important; background: linear-gradient(90deg, #ffffff 0%, #ffd1d5 50%, #e50914 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; filter: drop-shadow(0 2px 10px rgba(229, 9, 20, 0.8));'>🎬 LOGIN 🎬</h1>
-            <p class='login-subtitle' style='text-align:center; color:#ffffff !important; -webkit-text-fill-color:#ffffff !important; font-size: 18px; font-weight: 700; text-shadow: 0 2px 12px rgba(229, 9, 20, 0.6);'>Enter your credentials to access the system</p>
+            <h1 class='login-title' style='text-align:center; color:#ffffff !important; -webkit-text-fill-color:#ffffff !important; font-size: 48px; font-weight: 900; letter-spacing: 2px; text-shadow: 0 3px 15px rgba(0, 0, 0, 1), 0 0 15px rgba(229, 9, 20, 0.9);'>🎬 LOGIN 🎬</h1>
+            <p class='login-subtitle' style='text-align:center; color:#ffffff !important; -webkit-text-fill-color:#ffffff !important; font-size: 16px; font-weight: 700; text-shadow: 0 2px 10px rgba(0, 0, 0, 1);'>Welcome back! Please enter your credentials</p>
         </div>
         """, unsafe_allow_html=True)
 
-        st.markdown("<div class='field-label' style='color:#ffffff !important; -webkit-text-fill-color:#ffffff !important; font-size: 18px; font-weight: 900; letter-spacing: 0.5px; text-shadow: 0 2px 8px rgba(0, 0, 0, 1), 0 0 10px rgba(229, 9, 20, 0.4); margin-bottom: 8px;'>👤 USERNAME</div>", unsafe_allow_html=True)
+        st.markdown("<div class='field-label' style='color:#ffffff !important; -webkit-text-fill-color:#ffffff !important; font-size: 16px; font-weight: 900; letter-spacing: 0.5px; text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8); margin-bottom: 8px;'>👤 USERNAME</div>", unsafe_allow_html=True)
         username = st.text_input("", key="login_username", label_visibility="collapsed")
-        st.markdown("<div class='field-label' style='color:#ffffff !important; -webkit-text-fill-color:#ffffff !important; font-size: 18px; font-weight: 900; letter-spacing: 0.5px; text-shadow: 0 2px 8px rgba(0, 0, 0, 1), 0 0 10px rgba(229, 9, 20, 0.4); margin-bottom: 8px; margin-top: 14px;'>🔑 PASSWORD</div>", unsafe_allow_html=True)
+        st.markdown("<div class='field-label' style='color:#ffffff !important; -webkit-text-fill-color:#ffffff !important; font-size: 16px; font-weight: 900; letter-spacing: 0.5px; text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8); margin-bottom: 8px; margin-top: 14px;'>🔑 PASSWORD</div>", unsafe_allow_html=True)
         password = st.text_input("", key="login_password", type="password", label_visibility="collapsed")
 
         if st.button("Login"):
