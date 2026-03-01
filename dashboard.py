@@ -4,8 +4,6 @@ import streamlit as st
 import pandas as pd
 from sklearn.metrics.pairwise import cosine_similarity
 import os
-from pathlib import Path
-import base64
 
 st.set_page_config(
     page_title="Movie Recommendation System",
@@ -16,10 +14,10 @@ st.markdown("""
 <style>
 /* Professional Movie Background */
 .stApp {
-    background: linear-gradient(rgba(10, 10, 20, 0.7), rgba(10, 10, 20, 0.7)), 
-                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800"><defs><pattern id="movies" x="0" y="0" width="300" height="400" patternUnits="userSpaceOnUse"><rect fill="%23111" width="300" height="400"/><text x="150" y="200" text-anchor="middle" fill="%23666" font-size="12">Movie</text></pattern></defs><rect width="1200" height="800" fill="url(%23movies)"/></svg>');
+    background: linear-gradient(rgba(15, 15, 25, 0.8), rgba(15, 15, 25, 0.8)), 
+                radial-gradient(circle at 20% 50%, rgba(229, 9, 20, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(229, 9, 20, 0.08) 0%, transparent 50%);
     background-attachment: fixed;
-    background-size: cover;
     color: white;
     min-height: 100vh;
 }
@@ -28,7 +26,7 @@ st.markdown("""
 .header-banner {
     background: linear-gradient(90deg, #000000 0%, #1a1a1a 50%, #000000 100%);
     padding: 30px 20px;
-    margin-bottom: 40px;
+    margin-bottom: 60px;
     text-align: center;
     box-shadow: 0px 8px 25px rgba(229, 9, 20, 0.5), 
                 0px 0px 40px rgba(229, 9, 20, 0.3);
@@ -56,10 +54,15 @@ st.markdown("""
     font-weight: 600;
 }
 
+/* Hide the default streamlit elements that create rectangles */
+[data-testid="stVerticalBlock"] > div > div > div {
+    background: transparent !important;
+}
+
 /* Center Login */
 .login-box {
-    background: linear-gradient(135deg, rgba(0,0,0,0.9) 0%, rgba(20,20,30,0.85) 100%);
-    padding: 50px;
+    background: linear-gradient(135deg, rgba(0,0,0,0.92) 0%, rgba(15,15,25,0.88) 100%);
+    padding: 50px 40px;
     border-radius: 20px;
     box-shadow: 0px 0px 50px rgba(229, 9, 20, 0.5), 
                 0px 0px 100px rgba(0,0,0,0.9),
@@ -75,9 +78,14 @@ st.markdown("""
     color: #ffffff;
 }
 
+/* Remove input wrapper styling */
+div[data-testid="stTextInput"] {
+    background: transparent !important;
+}
+
 /* Input fields */
 div[data-testid="stTextInput"] > div > div > input {
-    background-color: rgba(31, 31, 31, 0.8) !important;
+    background-color: rgba(31, 31, 31, 0.9) !important;
     color: white !important;
     border: 2px solid #e50914 !important;
     border-radius: 10px !important;
@@ -93,7 +101,7 @@ div[data-testid="stTextInput"] > div > div > input:focus {
 }
 
 div[data-testid="stTextInput"] > label {
-    color: #cccccc !important;
+    color: #e0e0e0 !important;
     font-weight: 600 !important;
     font-size: 15px !important;
 }
@@ -109,7 +117,6 @@ div[data-testid="stTextInput"] > label {
     border: none !important;
     font-size: 18px !important;
     box-shadow: 0px 4px 20px rgba(229, 9, 20, 0.5) !important;
-    transition: all 0.3s ease !important;
 }
 
 .stButton>button:hover {
@@ -119,45 +126,19 @@ div[data-testid="stTextInput"] > label {
 
 /* Login subtitle */
 .login-subtitle {
-    color: #b0b0b0;
+    color: #d0d0d0;
     font-size: 16px;
     font-weight: 500;
 }
 
-/* Remove extra spacing */
-.stColumn {
+/* Remove column padding */
+[data-testid="column"] {
     padding: 0 !important;
 }
 </style>
 """, unsafe_allow_html=True)
 
 OMDB_API_KEY =("e09f8ad5")
-
-# Load and encode movie poster images for background
-def get_image_backgrounds():
-    frontend_path = Path("frontend")
-    images = []
-    if frontend_path.exists():
-        for img_file in sorted(frontend_path.glob("*")):
-            if img_file.suffix.lower() in ['.jpg', '.jpeg', '.png', '.webp']:
-                try:
-                    with open(img_file, 'rb') as f:
-                        images.append(base64.b64encode(f.read()).decode())
-                except:
-                    pass
-    return images
-
-# Get all poster images
-poster_images = get_image_backgrounds()
-
-# Create background HTML with movie posters
-if poster_images:
-    background_html = '<div style="position:fixed;top:0;left:0;width:100%;height:100%;z-index:-1;opacity:0.15;">'
-    background_html += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0;width:100%;height:100%;">'
-    for img_data in poster_images:
-        background_html += f'<img src="data:image/jpeg;base64,{img_data}" style="width:100%;height:100%;object-fit:cover;" />'
-    background_html += '</div></div>'
-    st.markdown(background_html, unsafe_allow_html=True)
 
 # -------- LOGIN SYSTEM --------
 if "logged_in" not in st.session_state:
