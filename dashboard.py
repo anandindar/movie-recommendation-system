@@ -12,31 +12,108 @@ st.set_page_config(
 
 st.markdown("""
 <style>
+/* Movie posters background pattern */
 .stApp {
-    background: linear-gradient(to right, #141e30, #243b55);
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    background-attachment: fixed;
     color: white;
+    position: relative;
+}
+
+/* Movie poster decorative background */
+.stApp::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    opacity: 0.05;
+    background-image: 
+        repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(255,255,255,.1) 35px, rgba(255,255,255,.1) 70px),
+        repeating-linear-gradient(-45deg, transparent, transparent 35px, rgba(255,255,255,.05) 35px, rgba(255,255,255,.05) 70px);
+    z-index: 0;
+}
+
+/* Top header banner */
+.header-banner {
+    background-color: #000000;
+    padding: 20px;
+    margin: -80px -80px 40px -80px;
+    text-align: center;
+    box-shadow: 0px 8px 20px rgba(229, 9, 20, 0.3);
+    border-bottom: 4px solid #e50914;
+}
+
+.header-title {
+    font-size: 48px;
+    font-weight: bold;
+    color: white;
+    text-shadow: 0px 4px 10px rgba(229, 9, 20, 0.8);
+    margin: 0;
+    letter-spacing: 2px;
+}
+
+.header-subtitle {
+    font-size: 18px;
+    color: #e50914;
+    margin-top: 5px;
+    font-style: italic;
 }
 
 /* Center Login */
 .login-box {
-    background-color: rgba(0,0,0,0.7);
-    padding: 40px;
-    border-radius: 15px;
-    box-shadow: 0px 0px 25px rgba(0,0,0,0.8);
+    background-color: rgba(0,0,0,0.85);
+    padding: 50px;
+    border-radius: 20px;
+    box-shadow: 0px 0px 40px rgba(229, 9, 20, 0.4), 0px 0px 80px rgba(0,0,0,0.8);
+    border: 2px solid #e50914;
+    backdrop-filter: blur(10px);
+}
+
+.login-title {
+    font-size: 42px;
+    text-shadow: 0px 2px 10px rgba(229, 9, 20, 0.6);
 }
 
 /* Input fields */
 div[data-testid="stTextInput"] > div > div > input {
-    background-color: #1f1f1f;
-    color: white;
+    background-color: #1f1f1f !important;
+    color: white !important;
+    border: 2px solid #e50914 !important;
+    border-radius: 8px !important;
+    padding: 12px !important;
+}
+
+div[data-testid="stTextInput"] > div > div > input:focus {
+    border-color: #ff6b6b !important;
+    box-shadow: 0 0 10px rgba(229, 9, 20, 0.3) !important;
 }
 
 /* Button */
 .stButton>button {
-    background-color: #e50914;
-    color: white;
-    border-radius: 8px;
-    width: 100%;
+    background-color: #e50914 !important;
+    color: white !important;
+    border-radius: 8px !important;
+    width: 100% !important;
+    padding: 12px !important;
+    font-weight: bold !important;
+    border: none !important;
+    transition: all 0.3s ease !important;
+    box-shadow: 0px 4px 15px rgba(229, 9, 20, 0.4) !important;
+}
+
+.stButton>button:hover {
+    background-color: #ff6b6b !important;
+    box-shadow: 0px 6px 20px rgba(229, 9, 20, 0.7) !important;
+    transform: translateY(-2px) !important;
+}
+
+/* Login subtitle */
+.login-subtitle {
+    color: #cccccc;
+    font-size: 16px;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -51,13 +128,20 @@ if "username" not in st.session_state:
     st.session_state.username = ""
 
 if not st.session_state.logged_in:
+    # Add Header Banner
+    st.markdown("""
+    <div class='header-banner'>
+        <h1 class='header-title'>🎬 MOVIES RECOMMEND SYSTEM 🎬</h1>
+        <p class='header-subtitle'>✨ Discover Your Next Favorite Movie ✨</p>
+    </div>
+    """, unsafe_allow_html=True)
 
     col1, col2, col3 = st.columns([1,2,1])
 
     with col2:
         st.markdown("<div class='login-box'>", unsafe_allow_html=True)
-        st.markdown("<h1 style='text-align:center;'>🎬 Welcome Back</h1>", unsafe_allow_html=True)
-        st.markdown("<p style='text-align:center;'>Login to continue</p>", unsafe_allow_html=True)
+        st.markdown("<h1 class='login-title' style='text-align:center;'>🎬 Welcome Back</h1>", unsafe_allow_html=True)
+        st.markdown("<p class='login-subtitle' style='text-align:center;'>Login to continue</p>", unsafe_allow_html=True)
 
         username = st.text_input("Username")
         password = st.text_input("Password", type="password")
