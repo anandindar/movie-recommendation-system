@@ -52,13 +52,14 @@ st.markdown(f"""
 <style>
 /* Professional Movie Background with Poster Images */
 .stApp {{
+    background-color: #0f0f19;
     background-image: 
-        linear-gradient(rgba(15, 15, 25, 0.85), rgba(15, 15, 25, 0.85)),
+        linear-gradient(rgba(15, 15, 25, 0.45), rgba(15, 15, 25, 0.45)),
         {background_images_css if background_images_css else 'linear-gradient(rgba(15, 15, 25, 0.5), rgba(15, 15, 25, 0.5))'};
     background-attachment: fixed;
-    background-size: cover, auto;
-    background-position: center, top left;
-    background-repeat: no-repeat, repeat;
+    background-size: cover;
+    background-position: center;
+    background-repeat: repeat;
     color: white;
     min-height: 100vh;
 }}
