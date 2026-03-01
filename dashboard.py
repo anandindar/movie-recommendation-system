@@ -4,23 +4,64 @@ import streamlit as st
 import pandas as pd
 from sklearn.metrics.pairwise import cosine_similarity
 import os
+from pathlib import Path
+import base64
 
 st.set_page_config(
     page_title="Movie Recommendation System",
     layout="wide"
 )
 
-st.markdown("""
+# Load and encode images from frontend folder
+def load_frontend_images():
+    frontend_path = Path("frontend")
+    images_data = []
+    
+    if frontend_path.exists():
+        for img_file in sorted(frontend_path.glob("*")):
+            if img_file.suffix.lower() in ['.jpg', '.jpeg', '.png', '.webp']:
+                try:
+                    with open(img_file, 'rb') as f:
+                        img_base64 = base64.b64encode(f.read()).decode()
+                        # Determine mime type
+                        mime_type = 'image/jpeg' if img_file.suffix.lower() in ['.jpg', '.jpeg'] else f'image/{img_file.suffix.lower().strip(".")}'
+                        images_data.append({
+                            'name': img_file.stem,
+                            'data': img_base64,
+                            'mime': mime_type
+                        })
+                except Exception as e:
+                    print(f"Error loading {img_file}: {e}")
+    
+    return images_data
+
+# Load all images
+movie_images = load_frontend_images()
+
+# Create background images CSS string
+background_images_css = ""
+for idx, img in enumerate(movie_images):
+    background_images_css += f"url('data:{img['mime']};base64,{img['data']}') "
+    if idx < len(movie_images) - 1:
+        background_images_css += ", "
+
+# Remove trailing space and comma if exists
+background_images_css = background_images_css.rstrip(", ")
+
+st.markdown(f"""
 <style>
-/* Professional Movie Background */
-.stApp {
-    background: linear-gradient(rgba(15, 15, 25, 0.8), rgba(15, 15, 25, 0.8)), 
-                radial-gradient(circle at 20% 50%, rgba(229, 9, 20, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(229, 9, 20, 0.08) 0%, transparent 50%);
+/* Professional Movie Background with Poster Images */
+.stApp {{
+    background-image: 
+        linear-gradient(rgba(15, 15, 25, 0.85), rgba(15, 15, 25, 0.85)),
+        {background_images_css if background_images_css else 'linear-gradient(rgba(15, 15, 25, 0.5), rgba(15, 15, 25, 0.5))'};
     background-attachment: fixed;
+    background-size: cover, auto;
+    background-position: center, top left;
+    background-repeat: no-repeat, repeat;
     color: white;
     min-height: 100vh;
-}
+}}
 
 /* Top header banner */
 .header-banner {
