@@ -1,6 +1,10 @@
 import math
 import base64
+from math import gcd
 from pathlib import Path
+
+def _lcm(a: int, b: int) -> int:
+    return a * b // gcd(a, b)
 
 OMDB_API_KEY = "e09f8ad5"
 
@@ -43,31 +47,36 @@ def build_background(movie_images):
         grid_layout_css  (str) – CSS custom-property assignments
         background_html  (str) – HTML injected into the page
     """
-    grid_layout_css = (
-        "--bg-cols: 1; --bg-rows: 1; "
-        "--bg-cols-md: 1; --bg-rows-md: 1; "
-        "--bg-cols-sm: 1; --bg-rows-sm: 1;"
-    )
+    grid_layout_css = "--bg-cols: 1; --bg-cols-md: 1; --bg-cols-sm: 1;"
     background_html = ""
 
     if not movie_images:
         return grid_layout_css, background_html
 
     total_images = len(movie_images)
-    grid_cols = math.ceil(math.sqrt(total_images))
-    grid_rows = math.ceil(total_images / grid_cols)
+    grid_cols    = math.ceil(math.sqrt(total_images))
+    grid_rows    = math.ceil(total_images / grid_cols)
     grid_cols_md = max(2, min(grid_cols, 4))
     grid_rows_md = math.ceil(total_images / grid_cols_md)
     grid_cols_sm = max(2, min(grid_cols, 3))
     grid_rows_sm = math.ceil(total_images / grid_cols_sm)
 
+    # Only the column counts are needed as CSS vars now (rows are auto)
     grid_layout_css = (
-        f"--bg-cols: {grid_cols}; --bg-rows: {grid_rows}; "
-        f"--bg-cols-md: {grid_cols_md}; --bg-rows-md: {grid_rows_md}; "
-        f"--bg-cols-sm: {grid_cols_sm}; --bg-rows-sm: {grid_rows_sm};"
+        f"--bg-cols: {grid_cols}; "
+        f"--bg-cols-md: {grid_cols_md}; "
+        f"--bg-cols-sm: {grid_cols_sm};"
     )
 
-    total_slots = grid_cols * grid_rows
+    # Round total_slots up to the LCM of all column counts so that every
+    # breakpoint layout has complete rows and no dark partial-row gaps.
+    col_lcm     = _lcm(_lcm(grid_cols, grid_cols_md), grid_cols_sm)
+    min_slots   = max(
+        grid_cols    * grid_rows,
+        grid_cols_md * grid_rows_md,
+        grid_cols_sm * grid_rows_sm,
+    )
+    total_slots = math.ceil(min_slots / col_lcm) * col_lcm
     tiled = [movie_images[i % total_images] for i in range(total_slots)]
     cells = [
         f"<div class='bg-cell'>"
@@ -118,14 +127,15 @@ section.main {{
 /* ── Poster grid ── */
 .page-bg-grid {{
     position: fixed;
-    /* inset:0 already pins all four edges to the viewport – no explicit
-       width/height needed; adding them can fight inset on some mobile browsers */
-    inset: 0;
+    inset: 0;              /* pins all four edges to the viewport */
     z-index: 0;
     display: grid;
     {grid_layout_css}
     grid-template-columns: repeat(var(--bg-cols), 1fr);
-    grid-template-rows: repeat(var(--bg-rows), 1fr);
+    /* grid-auto-rows:1fr distributes ALL rows equally across the bounded
+       viewport height so the grid always covers the full screen, even when
+       the automatic row count changes across breakpoints. */
+    grid-auto-rows: 1fr;
     overflow: hidden;
     pointer-events: none;
     touch-action: none;
@@ -166,14 +176,13 @@ section.main {{
 @media (max-width: 1000px) {{
     .page-bg-grid {{
         grid-template-columns: repeat(var(--bg-cols-md), 1fr);
-        grid-template-rows: repeat(var(--bg-rows-md), 1fr);
+        /* grid-auto-rows keeps distributing rows evenly at this breakpoint */
     }}
 }}
 
 @media (max-width: 640px) {{
     .page-bg-grid {{
         grid-template-columns: repeat(var(--bg-cols-sm), 1fr);
-        grid-template-rows: repeat(var(--bg-rows-sm), 1fr);
     }}
 }}
 
