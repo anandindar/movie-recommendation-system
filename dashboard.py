@@ -281,9 +281,14 @@ if "logged_in" not in st.session_state:
 if "username" not in st.session_state:
     st.session_state.username = ""
 
-# Already logged in → go straight to the app
+# ── Already logged in → run the app page via st.navigation (no switch_page) ─
 if st.session_state.logged_in:
-    st.switch_page("pages/app.py")
+    pg = st.navigation(
+        [st.Page("pages/app.py", title="Movies", icon="🎬")],
+        position="hidden",
+    )
+    pg.run()
+    st.stop()
 
 # ── Render background ───────────────────────────────────────────────────────
 if background_html:
@@ -318,7 +323,7 @@ with col2:
         if username == VALID_USERNAME and password == VALID_PASSWORD:
             st.session_state.logged_in = True
             st.session_state.username = username
-            st.switch_page("pages/app.py")
+            st.rerun()   # re-runs dashboard.py → hits the navigation block above
         else:
             st.error("Invalid Credentials ❌")
 

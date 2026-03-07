@@ -13,8 +13,9 @@ from utils import OMDB_API_KEY
 st.set_page_config(page_title="Movie Recommendations", layout="wide")
 
 # ── Auth guard ───────────────────────────────────────────────────────────────
+# When accessed directly (not via dashboard.py navigation), just stop rendering.
 if not st.session_state.get("logged_in", False):
-    st.switch_page("dashboard.py")
+    st.stop()
 
 # ── Global CSS (Netflix-style cards + hover + badges + genre tags) ───────────
 st.markdown(
@@ -144,7 +145,7 @@ with st.sidebar:
     if st.button("🚪 Logout"):
         st.session_state.logged_in = False
         st.session_state.username = ""
-        st.switch_page("dashboard.py")
+        st.rerun()  # re-runs dashboard.py (parent nav context) → shows login
 
 # ── Header ────────────────────────────────────────────────────────────────────
 st.markdown(
