@@ -51,15 +51,14 @@ def build_background(movie_images):
 
     total_images = len(movie_images)
 
-    # ── Fixed layouts that look great at each breakpoint ──────────────────
-    # Desktop  : 5 cols × 4 rows  = 20 cells
-    # Tablet   : 4 cols × 5 rows  = 20 cells
-    # Mobile   : 3 cols × 7 rows  = 21 cells
-    # These values are tuned so posters are portrait-shaped & fill the screen.
+    # ── Fixed layouts tuned to fill every common screen size ──────────────
+    # Desktop  (>1200px): 7 cols × 5 rows = 35 cells  → covers 4K & ultrawide
+    # Tablet   (≤1200px): 5 cols × 6 rows = 30 cells
+    # Mobile   (≤640px) : 3 cols × 8 rows = 24 cells
     LAYOUTS = {
-        "desktop": (5, 4),
-        "md":      (4, 5),
-        "sm":      (3, 7),
+        "desktop": (7, 5),
+        "md":      (5, 6),
+        "sm":      (3, 8),
     }
 
     dc, dr = LAYOUTS["desktop"]
@@ -164,7 +163,7 @@ section.main {{
     touch-action: none;
 }}
 
-@media (max-width: 1000px) {{
+@media (max-width: 1200px) {{
     .page-bg-grid {{
         grid-template-columns: repeat(var(--bg-cols-md), 1fr);
         grid-template-rows:    repeat(var(--bg-rows-md), 1fr);

@@ -20,11 +20,11 @@ st.markdown(f"""
 
 /* ── Header title ── */
 .header-title {{
-    font-size: clamp(22px, 3vw, 42px);
+    font-size: clamp(20px, 2.6vw, 38px);
     font-weight: 900;
-    margin: 0 0 28px 0;
-    letter-spacing: 3px;
-    line-height: 1.15;
+    margin: 0 0 32px 0;
+    letter-spacing: 4px;
+    line-height: 1.2;
     font-family: 'Bebas Neue', sans-serif;
     color: #ffffff !important;
     -webkit-text-fill-color: #ffffff !important;
@@ -42,7 +42,7 @@ st.markdown(f"""
     background: transparent !important;
     padding: 0 !important;
     margin: 0 auto;
-    max-width: 480px;
+    max-width: 420px;
     width: 100%;
     box-shadow: none !important;
     border: none !important;
@@ -51,14 +51,14 @@ st.markdown(f"""
 }}
 
 .welcome-box {{
-    background: rgba(8, 12, 24, 0.78) !important;
+    background: rgba(8, 12, 24, 0.80) !important;
     border: 2px solid rgba(229, 9, 20, 0.75) !important;
     border-radius: 20px;
-    padding: 32px 32px 26px 32px;
+    padding: 30px 32px 24px 32px;
     margin-bottom: 20px;
-    box-shadow: 0 8px 40px rgba(0,0,0,0.6), 0 0 28px rgba(229,9,20,0.25) !important;
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    box-shadow: 0 8px 40px rgba(0,0,0,0.65), 0 0 32px rgba(229,9,20,0.3) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
 }}
 
 .login-title {{
@@ -190,25 +190,34 @@ div[data-testid="stTextInput"] input::placeholder {{
     border-color: rgba(255,209,213,1.0) !important;
 }}
 
-/* ── Vertically centre the login form in the viewport ── */
+/* ── Centre the entire login form on all screens ── */
 [data-testid="stMainBlockContainer"] {{
-    min-height: 100dvh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    padding-top: 40px !important;
-    padding-bottom: 40px !important;
+    min-height: 100dvh !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 32px 16px !important;
+    /* override conflicting bottom-padding from mobile fix below */
+    padding-bottom: max(env(safe-area-inset-bottom, 16px), 32px) !important;
+}}
+/* Every direct child in the block container gets auto centred */
+[data-testid="stMainBlockContainer"] > div,
+[data-testid="stMainBlockContainer"] > div > div {{
+    width: 100%;
+    max-width: 480px;
+    padding-bottom: 0 !important;
+}}
+/* but the header stretches full width */
+[data-testid="stMainBlockContainer"] > div:first-child,
+[data-testid="stMainBlockContainer"] > div:first-child > div {{
+    max-width: 100% !important;
 }}
 
 [data-testid="column"] {{ padding: 0 !important; }}
 
 /* ── Responsive ── */
-@media (max-width: 1024px) {{
-    .login-box {{ max-width: 440px; }}
-    .welcome-box {{ padding: 26px 24px 20px 24px !important; }}
-}}
 @media (max-width: 768px) {{
-    section.main > div {{ padding-left: 0.8rem !important; padding-right: 0.8rem !important; }}
     .welcome-box {{ padding: 22px 18px 16px 18px !important; border-radius: 16px !important; }}
     .login-title {{ font-size: clamp(36px, 10vw, 52px) !important; }}
     .login-subtitle {{ font-size: 14px !important; }}
@@ -252,12 +261,10 @@ section.main {{
     overflow-x: hidden !important;
 }}
 
-/* Main content block – add safe-area bottom padding so nothing hides behind
-   the home-indicator / nav bar on iOS & Android */
+/* Main content block – safe-area bottom padding */
 [data-testid="stMainBlockContainer"],
 section.main > div,
 section.main > div > div {{
-    padding-bottom: max(env(safe-area-inset-bottom, 0px), 80px) !important;
     overflow: visible !important;
 }}
 
@@ -268,20 +275,12 @@ section.main > div > div {{
     touch-action: none !important;
 }}
 
-/* On very small screens collapse the side columns so the form is full width */
+/* On very small screens ensure form is full-width */
 @media (max-width: 600px) {{
-    [data-testid="stColumns"] > div:first-child,
-    [data-testid="stColumns"] > div:last-child {{
-        display: none !important;
-        flex: 0 !important;
-        min-width: 0 !important;
-        max-width: 0 !important;
-        padding: 0 !important;
-    }}
-    [data-testid="stColumns"] > div:nth-child(2) {{
-        flex: 1 1 100% !important;
+    [data-testid="stMainBlockContainer"] > div,
+    [data-testid="stMainBlockContainer"] > div > div {{
         max-width: 100% !important;
-        padding: 0 12px !important;
+        padding: 0 4px !important;
     }}
 }}
 </style>
@@ -313,31 +312,27 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# ── Login form ──────────────────────────────────────────────────
-# Use tighter column ratio so the card is always a compact, centred panel
-col1, col2, col3 = st.columns([1.5, 2, 1.5])
+# ── Login form (CSS handles centering – no st.columns needed) ──────────────
+st.markdown("<div class='login-box'>", unsafe_allow_html=True)
+st.markdown("""
+<div class='welcome-box'>
+    <h1 class='login-title' style='text-align:center;'>🎬 LOGIN 🎬</h1>
+    <p class='login-subtitle' style='text-align:center;'>Welcome back! Please enter your credentials</p>
+</div>
+""", unsafe_allow_html=True)
 
-with col2:
-    st.markdown("<div class='login-box'>", unsafe_allow_html=True)
-    st.markdown("""
-    <div class='welcome-box'>
-        <h1 class='login-title' style='text-align:center;'>🎬 LOGIN 🎬</h1>
-        <p class='login-subtitle' style='text-align:center;'>Welcome back! Please enter your credentials</p>
-    </div>
-    """, unsafe_allow_html=True)
+st.markdown("<div class='field-label' style='margin-bottom:8px;'>👤 USERNAME</div>", unsafe_allow_html=True)
+username = st.text_input("", key="login_username", label_visibility="collapsed")
 
-    st.markdown("<div class='field-label' style='margin-bottom:8px;'>👤 USERNAME</div>", unsafe_allow_html=True)
-    username = st.text_input("", key="login_username", label_visibility="collapsed")
+st.markdown("<div class='field-label' style='margin-bottom:8px; margin-top:14px;'>🔑 PASSWORD</div>", unsafe_allow_html=True)
+password = st.text_input("", key="login_password", type="password", label_visibility="collapsed")
 
-    st.markdown("<div class='field-label' style='margin-bottom:8px; margin-top:14px;'>🔑 PASSWORD</div>", unsafe_allow_html=True)
-    password = st.text_input("", key="login_password", type="password", label_visibility="collapsed")
+if st.button("Login"):
+    if username == VALID_USERNAME and password == VALID_PASSWORD:
+        st.session_state.logged_in = True
+        st.session_state.username = username
+        st.rerun()
+    else:
+        st.error("Invalid Credentials ❌")
 
-    if st.button("Login"):
-        if username == VALID_USERNAME and password == VALID_PASSWORD:
-            st.session_state.logged_in = True
-            st.session_state.username = username
-            st.rerun()   # re-runs dashboard.py → hits the navigation block above
-        else:
-            st.error("Invalid Credentials ❌")
-
-    st.markdown("</div>", unsafe_allow_html=True)
+st.markdown("</div>", unsafe_allow_html=True)

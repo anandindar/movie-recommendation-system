@@ -337,7 +337,33 @@ if st.button("🎬  Get Recommendations", use_container_width=True):
 st.divider()
 st.markdown("## 📊 Movie Analytics Dashboard")
 
-# Top Rated Movies
+# ── Key metrics row ───────────────────────────────────────────────────────
+m1, m2, m3, m4 = st.columns(4)
+m1.metric("🎬 Total Movies",   f"{len(movies):,}")
+m2.metric("👥 Total Users",    f"{ratings['userId'].nunique():,}")
+m3.metric("⭐ Total Ratings",  f"{len(ratings):,}")
+m4.metric("📈 Avg Rating",     f"{ratings['rating'].mean():.2f}")
+
+st.markdown("")   # spacer
+
+# ── Helper: dark-themed figure ────────────────────────────────────────────
+BG   = "#0e0e0e"
+TILE = "#1a1a1a"
+RED  = "#e50914"
+GOLD = "#f5c518"
+TEAL = "#00b4d8"
+
+def dark_fig(w=10, h=5):
+    fig, ax = plt.subplots(figsize=(w, h), facecolor=BG)
+    ax.set_facecolor(TILE)
+    for spine in ax.spines.values():
+        spine.set_edgecolor("#333")
+    ax.tick_params(colors="#bbb", labelsize=10)
+    ax.xaxis.label.set_color("#aaa")
+    ax.yaxis.label.set_color("#aaa")
+    return fig, ax
+
+# ── Top + Most Watched side by side ──────────────────────────────────────
 avg_rating = (
     ratings.groupby("movieId")["rating"]
     .mean()
@@ -346,18 +372,6 @@ avg_rating = (
 )
 top_rated = avg_rating.sort_values("rating", ascending=False).head(10)
 
-st.markdown("### ⭐ Top Rated Movies")
-fig, ax = plt.subplots(facecolor="#0e0e0e")
-ax.set_facecolor("#141414")
-ax.barh(top_rated["title"], top_rated["rating"], color="#e50914")
-ax.invert_yaxis()
-ax.set_xlabel("Average Rating", color="#aaa")
-ax.tick_params(colors="#ccc")
-for spine in ax.spines.values():
-    spine.set_edgecolor("#333")
-st.pyplot(fig)
-
-# Most Watched Movies
 count_rating = (
     ratings.groupby("movieId")
     .size()
@@ -366,25 +380,63 @@ count_rating = (
 )
 most_rated = count_rating.sort_values("count", ascending=False).head(10)
 
-st.markdown("### 🔥 Most Watched Movies")
-fig2, ax2 = plt.subplots(facecolor="#0e0e0e")
-ax2.set_facecolor("#141414")
-ax2.barh(most_rated["title"], most_rated["count"], color="#f5c518")
-ax2.invert_yaxis()
-ax2.set_xlabel("Number of Ratings", color="#aaa")
-ax2.tick_params(colors="#ccc")
-for spine in ax2.spines.values():
-    spine.set_edgecolor("#333")
-st.pyplot(fig2)
+col_a, col_b = st.columns(2)
 
-# Rating Distribution
-st.markdown("### 📈 Rating Distribution")
-fig3, ax3 = plt.subplots(facecolor="#0e0e0e")
-ax3.set_facecolor("#141414")
-ax3.hist(ratings["rating"], bins=10, color="#e50914", edgecolor="#0e0e0e")
-ax3.set_xlabel("Rating", color="#aaa")
-ax3.set_ylabel("Count", color="#aaa")
-ax3.tick_params(colors="#ccc")
-for spine in ax3.spines.values():
-    spine.set_edgecolor("#333")
-st.pyplot(fig3)
+with col_a:
+    st.markdown("### ⭐ Top Rated Movies")
+    fig, ax = dark_fig()
+    bars = ax.barh(top_rated["title"], top_rated["rating"],
+                   color=RED, edgecolor="none", height=0.65)
+    ax.bar_label(bars, fmt="%.2f", color="#fff", fontsize=9, padding=4)
+    ax.set_xlim(0, 5.8)
+    ax.invert_yaxis()
+    ax.set_xlabel("Average Rating")
+    ax.tick_params(axis="y", labelsize=9)
+    plt.tight_layout()
+    st.pyplot(fig)
+    plt.close(fig)
+
+with col_b:
+    st.markdown("### 🔥 Most Watched Movies")
+    fig2, ax2 = dark_fig()
+    bars2 = ax2.barh(most_rated["title"], most_rated["count"],
+                     color=GOLD, edgecolor="none", height=0.65)
+    ax2.bar_label(bars2, fmt="%d", color="#fff", fontsize=9, padding=4)
+    ax2.invert_yaxis()
+    ax2.set_xlabel("Number of Ratings")
+    ax2.tick_params(axis="y", labelsize=9)
+    plt.tight_layout()
+    st.pyplot(fig2)
+    plt.close(fig2)
+
+# ── Rating distribution + Genre breakdown side by side ───────────────────
+col_c, col_d = st.columns(2)
+
+with col_c:
+    st.markdown("### 📈 Rating Distribution")
+    fig3, ax3 = dark_fig(7, 4)
+    counts, edges, patches = ax3.hist(ratings["rating"], bins=10,
+                                      color=RED, edgecolor=BG, linewidth=0.6)
+    ax3.set_xlabel("Rating")
+    ax3.set_ylabel("Count")
+    plt.tight_layout()
+    st.pyplot(fig3)
+    plt.close(fig3)
+
+with col_d:
+    st.markdown("### 🎭 Top Genres")
+    genre_counts = (
+        movies["genres"]
+        .str.split("|")
+        .explode()
+        .value_counts()
+        .head(10)
+    )
+    fig4, ax4 = dark_fig(7, 4)
+    ax4.barh(genre_counts.index[::-1], genre_counts.values[::-1],
+             color=TEAL, edgecolor="none", height=0.65)
+    ax4.set_xlabel("Number of Movies")
+    ax4.tick_params(axis="y", labelsize=9)
+    plt.tight_layout()
+    st.pyplot(fig4)
+    plt.close(fig4)
