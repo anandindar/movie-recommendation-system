@@ -208,12 +208,26 @@ div[data-testid="stTextInput"] input::placeholder {{
 }}
 
 /* ── Mobile viewport / scroll fix ── */
-html, body {{
-    height: 100% !important;
+html {{
+    background: #050814 !important;
     overflow-y: auto !important;
+}}
+body {{
+    background: #050814 !important;
+    overflow-y: auto !important;
+    min-height: 100dvh !important;
 }}
 
 /* Fill the full visible height including mobile browser chrome */
+#root,
+.stApp,
+[data-testid="stApp"],
+[data-testid="stAppViewContainer"],
+[data-testid="stMain"],
+section.main {{
+    background: #050814 !important;
+}}
+
 .stApp {{
     min-height: 100dvh !important;
     overflow-y: auto !important;

@@ -87,16 +87,30 @@ def build_background(movie_images):
 def background_css(grid_layout_css: str) -> str:
     """Return the CSS for the full-page poster grid and overlay."""
     return f"""
-/* ── Base ── */
-html, body {{
-    height: 100% !important;
+/* ── Base – dark everywhere so gray never bleeds through ── */
+html {{
+    background: #050814 !important;
     overflow-y: auto !important;
+}}
+body {{
+    background: #050814 !important;
+    overflow-y: auto !important;
+    min-height: 100dvh !important;
+}}
+
+/* Streamlit root elements */
+#root,
+.stApp,
+[data-testid="stApp"],
+[data-testid="stAppViewContainer"],
+[data-testid="stMain"],
+section.main {{
+    background: #050814 !important;
 }}
 
 .stApp {{
     position: relative;
-    background: transparent !important;
-    min-height: 100dvh;          /* dvh = dynamic viewport — respects mobile browser chrome */
+    min-height: 100dvh !important;
     font-family: 'Poppins', sans-serif;
     overflow-y: auto !important;
 }}
@@ -104,14 +118,14 @@ html, body {{
 /* ── Poster grid ── */
 .page-bg-grid {{
     position: fixed;
+    /* inset:0 already pins all four edges to the viewport – no explicit
+       width/height needed; adding them can fight inset on some mobile browsers */
     inset: 0;
     z-index: 0;
     display: grid;
     {grid_layout_css}
     grid-template-columns: repeat(var(--bg-cols), 1fr);
     grid-template-rows: repeat(var(--bg-rows), 1fr);
-    width: 100vw;
-    height: 100vh;
     overflow: hidden;
     pointer-events: none;
     touch-action: none;
