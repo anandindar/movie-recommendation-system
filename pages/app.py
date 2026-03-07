@@ -10,7 +10,9 @@ import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from utils import OMDB_API_KEY
 
-st.set_page_config(page_title="Movie Recommendations", layout="wide")
+# NOTE: st.set_page_config is intentionally NOT called here.
+# It is already set once in dashboard.py (the entry point).
+# Calling it again causes a StreamlitAPIException.
 
 # ── Auth guard ───────────────────────────────────────────────────────────────
 # When accessed directly (not via dashboard.py navigation), just stop rendering.

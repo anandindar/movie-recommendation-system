@@ -20,12 +20,12 @@ st.markdown(f"""
 
 /* ── Header title ── */
 .header-title {{
-    font-size: clamp(34px, 4.6vw, 54px);
+    font-size: clamp(22px, 3vw, 42px);
     font-weight: 900;
-    margin: 0;
-    letter-spacing: 2px;
-    line-height: 1;
-    font-family: 'Poppins', sans-serif;
+    margin: 0 0 28px 0;
+    letter-spacing: 3px;
+    line-height: 1.15;
+    font-family: 'Bebas Neue', sans-serif;
     color: #ffffff !important;
     -webkit-text-fill-color: #ffffff !important;
     text-shadow: 0 3px 15px rgba(0,0,0,1), 0 0 20px rgba(229,9,20,0.8);
@@ -42,7 +42,8 @@ st.markdown(f"""
     background: transparent !important;
     padding: 0 !important;
     margin: 0 auto;
-    max-width: 760px;
+    max-width: 480px;
+    width: 100%;
     box-shadow: none !important;
     border: none !important;
     position: relative;
@@ -50,13 +51,14 @@ st.markdown(f"""
 }}
 
 .welcome-box {{
-    background: rgba(10, 14, 28, 0.68) !important;
-    border: 2px solid rgba(229, 9, 20, 0.8) !important;
-    border-radius: 18px;
-    padding: 28px 24px 22px 24px;
-    margin-bottom: 16px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 24px rgba(229,9,20,0.3) !important;
-    backdrop-filter: blur(5px);
+    background: rgba(8, 12, 24, 0.78) !important;
+    border: 2px solid rgba(229, 9, 20, 0.75) !important;
+    border-radius: 20px;
+    padding: 32px 32px 26px 32px;
+    margin-bottom: 20px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.6), 0 0 28px rgba(229,9,20,0.25) !important;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
 }}
 
 .login-title {{
@@ -188,17 +190,27 @@ div[data-testid="stTextInput"] input::placeholder {{
     border-color: rgba(255,209,213,1.0) !important;
 }}
 
+/* ── Vertically centre the login form in the viewport ── */
+[data-testid="stMainBlockContainer"] {{
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-top: 40px !important;
+    padding-bottom: 40px !important;
+}}
+
 [data-testid="column"] {{ padding: 0 !important; }}
 
 /* ── Responsive ── */
 @media (max-width: 1024px) {{
-    .login-box {{ max-width: 100%; }}
-    .welcome-box {{ padding: 24px 20px 18px 20px !important; }}
+    .login-box {{ max-width: 440px; }}
+    .welcome-box {{ padding: 26px 24px 20px 24px !important; }}
 }}
 @media (max-width: 768px) {{
     section.main > div {{ padding-left: 0.8rem !important; padding-right: 0.8rem !important; }}
-    .welcome-box {{ padding: 22px 16px 16px 16px !important; border-radius: 16px !important; }}
-    .login-title {{ font-size: clamp(34px, 10vw, 46px) !important; }}
+    .welcome-box {{ padding: 22px 18px 16px 18px !important; border-radius: 16px !important; }}
+    .login-title {{ font-size: clamp(36px, 10vw, 52px) !important; }}
     .login-subtitle {{ font-size: 14px !important; }}
     .stButton > button {{ font-size: 16px !important; padding: 12px 14px !important; }}
 }}
@@ -296,13 +308,14 @@ if background_html:
 
 # ── Page heading ────────────────────────────────────────────────────────────
 st.markdown(
-    "<h1 class='header-title' style='text-align:center; margin: 14px 0 18px 0;'>"
+    "<h1 class='header-title' style='text-align:center;'>"
     "🎬 MOVIES RECOMMENDATION SYSTEM 🎬</h1>",
     unsafe_allow_html=True,
 )
 
-# ── Login form ──────────────────────────────────────────────────────────────
-col1, col2, col3 = st.columns([1, 2, 1])
+# ── Login form ──────────────────────────────────────────────────
+# Use tighter column ratio so the card is always a compact, centred panel
+col1, col2, col3 = st.columns([1.5, 2, 1.5])
 
 with col2:
     st.markdown("<div class='login-box'>", unsafe_allow_html=True)
