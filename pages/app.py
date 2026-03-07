@@ -14,7 +14,7 @@ st.set_page_config(page_title="Movie Recommendations", layout="wide")
 
 # ── Auth guard ───────────────────────────────────────────────────────────────
 if not st.session_state.get("logged_in", False):
-    st.switch_page("login.py")
+    st.switch_page("dashboard.py")
 
 # ── Global CSS (Netflix-style cards + hover + badges + genre tags) ───────────
 st.markdown(
@@ -144,7 +144,7 @@ with st.sidebar:
     if st.button("🚪 Logout"):
         st.session_state.logged_in = False
         st.session_state.username = ""
-        st.switch_page("login.py")
+        st.switch_page("dashboard.py")
 
 # ── Header ────────────────────────────────────────────────────────────────────
 st.markdown(
