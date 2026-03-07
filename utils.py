@@ -88,11 +88,17 @@ def background_css(grid_layout_css: str) -> str:
     """Return the CSS for the full-page poster grid and overlay."""
     return f"""
 /* ── Base ── */
+html, body {{
+    height: 100% !important;
+    overflow-y: auto !important;
+}}
+
 .stApp {{
     position: relative;
     background: transparent !important;
-    min-height: 100vh;
+    min-height: 100dvh;          /* dvh = dynamic viewport — respects mobile browser chrome */
     font-family: 'Poppins', sans-serif;
+    overflow-y: auto !important;
 }}
 
 /* ── Poster grid ── */
@@ -108,6 +114,7 @@ def background_css(grid_layout_css: str) -> str:
     height: 100vh;
     overflow: hidden;
     pointer-events: none;
+    touch-action: none;
     gap: 0;
     align-items: stretch;
     justify-items: stretch;
@@ -139,6 +146,7 @@ def background_css(grid_layout_css: str) -> str:
         radial-gradient(circle at 50% 20%, rgba(229,9,20,0.09), transparent 50%),
         linear-gradient(rgba(0,0,0,0.42), rgba(0,0,0,0.50));
     pointer-events: none;
+    touch-action: none;
 }}
 
 @media (max-width: 1000px) {{
@@ -156,5 +164,18 @@ def background_css(grid_layout_css: str) -> str:
 }}
 
 header[data-testid="stHeader"] {{ background: transparent; }}
-section.main > div {{ position: relative; z-index: 2; }}
+
+/* Scrollable content layer */
+section[data-testid="stMain"],
+section.main {{
+    overflow-y: auto !important;
+}}
+
+section.main > div {{
+    position: relative;
+    z-index: 2;
+    /* Safe-area padding so nothing hides behind iOS home indicator or
+       Android nav bar. Falls back to 80 px on browsers that don't support it. */
+    padding-bottom: max(env(safe-area-inset-bottom, 0px), 80px) !important;
+}}
 """

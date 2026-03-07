@@ -206,6 +206,58 @@ div[data-testid="stTextInput"] input::placeholder {{
     .welcome-box {{ padding: 18px 14px 14px 14px !important; }}
     div[data-testid="stTextInput"] input {{ font-size: 15px !important; padding: 12px 14px !important; }}
 }}
+
+/* ── Mobile viewport / scroll fix ── */
+html, body {{
+    height: 100% !important;
+    overflow-y: auto !important;
+}}
+
+/* Fill the full visible height including mobile browser chrome */
+.stApp {{
+    min-height: 100dvh !important;
+    overflow-y: auto !important;
+}}
+
+/* Streamlit's inner scroll container – must not clip */
+section[data-testid="stMain"],
+section.main {{
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+}}
+
+/* Main content block – add safe-area bottom padding so nothing hides behind
+   the home-indicator / nav bar on iOS & Android */
+[data-testid="stMainBlockContainer"],
+section.main > div,
+section.main > div > div {{
+    padding-bottom: max(env(safe-area-inset-bottom, 0px), 80px) !important;
+    overflow: visible !important;
+}}
+
+/* Prevent the background overlay/grid from eating pointer events or scroll */
+.page-bg-grid,
+.page-bg-overlay {{
+    pointer-events: none !important;
+    touch-action: none !important;
+}}
+
+/* On very small screens collapse the side columns so the form is full width */
+@media (max-width: 600px) {{
+    [data-testid="stColumns"] > div:first-child,
+    [data-testid="stColumns"] > div:last-child {{
+        display: none !important;
+        flex: 0 !important;
+        min-width: 0 !important;
+        max-width: 0 !important;
+        padding: 0 !important;
+    }}
+    [data-testid="stColumns"] > div:nth-child(2) {{
+        flex: 1 1 100% !important;
+        max-width: 100% !important;
+        padding: 0 12px !important;
+    }}
+}}
 </style>
 """, unsafe_allow_html=True)
 
