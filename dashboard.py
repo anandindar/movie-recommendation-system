@@ -1,6 +1,4 @@
 import streamlit as st
-import sys
-from pathlib import Path
 from utils import load_frontend_images, build_background, background_css, VALID_USERNAME, VALID_PASSWORD
 
 st.set_page_config(page_title="Movie Recommendation System – Login", layout="wide")
@@ -303,11 +301,9 @@ if "logged_in" not in st.session_state:
 if "username" not in st.session_state:
     st.session_state.username = ""
 
-# ── Already logged in → run the app page directly ───────────────────────────
+# ── Already logged in → go to app page ─────────────────────────────────────
 if st.session_state.logged_in:
-    # Run the app.py module
-    sys.path.insert(0, str(Path(__file__).parent))
-    exec(open(Path(__file__).parent / "pages" / "app.py", encoding="utf-8").read())
+    st.switch_page("pages/app.py")
     st.stop()
 
 # ── Render background ───────────────────────────────────────────────────────
@@ -341,7 +337,7 @@ if st.button("Login"):
     if username == VALID_USERNAME and password == VALID_PASSWORD:
         st.session_state.logged_in = True
         st.session_state.username = username
-        st.rerun()
+        st.switch_page("pages/app.py")
     else:
         st.error("Invalid Credentials ❌")
 

@@ -15,8 +15,9 @@ from utils import OMDB_API_KEY
 # Calling it again causes a StreamlitAPIException.
 
 # ── Auth guard ───────────────────────────────────────────────────────────────
-# When accessed directly (not via dashboard.py navigation), just stop rendering.
+# When accessed directly while logged out, send user to login page.
 if not st.session_state.get("logged_in", False):
+    st.switch_page("dashboard.py")
     st.stop()
 
 # ── Global CSS (Netflix-style cards + hover + badges + genre tags) ───────────
@@ -217,7 +218,7 @@ with st.sidebar:
     if st.button("🚪 Logout"):
         st.session_state.logged_in = False
         st.session_state.username = ""
-        st.rerun()  # re-runs dashboard.py (parent nav context) → shows login
+        st.switch_page("dashboard.py")
 
 # ── Header ────────────────────────────────────────────────────────────────────
 st.markdown(
