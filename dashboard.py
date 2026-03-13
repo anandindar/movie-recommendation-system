@@ -333,10 +333,10 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.markdown("<div class='field-label' style='margin-bottom:8px; color:#ffffff !important; font-size:18px; font-weight:900; text-shadow:0 2px 8px rgba(0,0,0,0.8);'>👤 USERNAME</div>", unsafe_allow_html=True)
-username = st.text_input("", key="login_username", label_visibility="collapsed")
+username = st.text_input("Username", key="login_username", label_visibility="collapsed")
 
 st.markdown("<div class='field-label' style='margin-bottom:8px; margin-top:14px; color:#ffffff !important; font-size:18px; font-weight:900; text-shadow:0 2px 8px rgba(0,0,0,0.8);'>🔑 PASSWORD</div>", unsafe_allow_html=True)
-password = st.text_input("", key="login_password", type="password", label_visibility="collapsed")
+password = st.text_input("Password", key="login_password", type="password", label_visibility="collapsed")
 
 if st.button("Login"):
     if username == VALID_USERNAME and password == VALID_PASSWORD:
