@@ -323,7 +323,6 @@ all_titles = sorted(movies["title"].tolist())
 search_query = st.text_input(
     "🔍  Search a movie...",
     placeholder="e.g. Toy Story, The Matrix, Inception...",
-    label_visibility="collapsed",
 )
 
 # Suggestion dropdown (shows up to 8 matches while typing)
@@ -336,7 +335,6 @@ if search_query.strip():
         selected_movie = st.selectbox(
             "Suggestions",
             suggestions,
-            label_visibility="collapsed",
         )
     else:
         st.caption("No matching movies found.")
@@ -344,7 +342,6 @@ else:
     selected_movie = st.selectbox(
         "Or pick from full list",
         all_titles,
-        label_visibility="collapsed",
     )
 
 num_recommendations = st.slider(
