@@ -3,7 +3,13 @@ import math
 from io import BytesIO
 from pathlib import Path
 
-from PIL import Image
+import streamlit as st
+
+try:
+    from PIL import Image
+    PIL_AVAILABLE = True
+except Exception:
+    PIL_AVAILABLE = False
 
 OMDB_API_KEY = "e09f8ad5"
 
@@ -12,8 +18,15 @@ VALID_USERNAME = "anand@0814"
 VALID_PASSWORD = "Tamkuhi@274407"
 
 
-def _encode_image_for_background(img_file: Path, max_size=(420, 620), quality=72):
-    """Resize and compress a poster so the login page remains lightweight."""
+def _encode_image_for_background(img_file: Path, max_size=(380, 560), quality=68):
+    """Resize and compress a poster so the login page remains lightweight.
+
+    Falls back to raw file bytes if Pillow is unavailable in deployment.
+    """
+    if not PIL_AVAILABLE:
+        with open(img_file, "rb") as f:
+            return base64.b64encode(f.read()).decode(), "image/jpeg"
+
     with Image.open(img_file) as image:
         if image.mode not in ("RGB", "L"):
             background = Image.new("RGB", image.size, (8, 10, 18))
@@ -26,21 +39,27 @@ def _encode_image_for_background(img_file: Path, max_size=(420, 620), quality=72
         image.thumbnail(max_size)
         buffer = BytesIO()
         image.save(buffer, format="JPEG", quality=quality, optimize=True)
-        return base64.b64encode(buffer.getvalue()).decode()
+        return base64.b64encode(buffer.getvalue()).decode(), "image/jpeg"
 
 
-def load_frontend_images():
+@st.cache_data(show_spinner=False)
+def load_frontend_images(max_images=12):
     """Load poster images from frontend/ and compress them for page background use."""
     frontend_path = Path("frontend")
     images_data = []
 
     if frontend_path.exists():
-        for img_file in sorted(frontend_path.glob("*")):
+        image_files = [
+            p for p in sorted(frontend_path.glob("*"))
+            if p.suffix.lower() in [".jpg", ".jpeg", ".png", ".webp"]
+        ][:max_images]
+
+        for img_file in image_files:
             if img_file.suffix.lower() in [".jpg", ".jpeg", ".png", ".webp"]:
                 try:
-                    img_base64 = _encode_image_for_background(img_file)
+                    img_base64, mime_type = _encode_image_for_background(img_file)
                     images_data.append(
-                        {"name": img_file.stem, "data": img_base64, "mime": "image/jpeg"}
+                        {"name": img_file.stem, "data": img_base64, "mime": mime_type}
                     )
                 except Exception as e:
                     print(f"Error loading {img_file}: {e}")

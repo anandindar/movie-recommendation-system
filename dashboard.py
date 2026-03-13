@@ -4,8 +4,13 @@ from utils import load_frontend_images, build_background, background_css, VALID_
 st.set_page_config(page_title="Movie Recommendation System – Login", layout="wide")
 
 # ── Build background ────────────────────────────────────────────────────────
-movie_images = load_frontend_images()
-grid_layout_css, background_html = build_background(movie_images)
+try:
+    movie_images = load_frontend_images()
+    grid_layout_css, background_html = build_background(movie_images)
+except Exception:
+    # Never crash login page due to heavy/invalid poster assets.
+    movie_images = []
+    grid_layout_css, background_html = build_background([])
 
 # ── Inject CSS ──────────────────────────────────────────────────────────────
 st.markdown(f"""
