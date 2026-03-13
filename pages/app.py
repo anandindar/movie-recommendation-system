@@ -135,6 +135,76 @@ st.markdown(
 
     /* ── section headers ── */
     h1, h2, h3 { color: #fff !important; }
+
+    /* ── Recommendation section inputs & controls ── */
+    /* Text inputs visible */
+    [data-testid="stTextInput"] input {
+        background: #1a1a1a !important;
+        color: #ffffff !important;
+        border: 1.5px solid #444 !important;
+        border-radius: 10px !important;
+        padding: 12px 16px !important;
+        font-size: 15px !important;
+    }
+    [data-testid="stTextInput"] input:focus {
+        border-color: #e50914 !important;
+        box-shadow: 0 0 0 2px rgba(229,9,20,0.3) !important;
+    }
+    [data-testid="stTextInput"] input::placeholder {
+        color: #888 !important;
+    }
+
+    /* Selectbox visible */
+    [data-testid="stSelectbox"] > div > div {
+        background: #1a1a1a !important;
+        border: 1.5px solid #444 !important;
+        border-radius: 10px !important;
+        color: #fff !important;
+    }
+    [data-testid="stSelectbox"] [data-baseweb="select"] > div {
+        background: #1a1a1a !important;
+        color: #fff !important;
+    }
+    [data-testid="stSelectbox"] svg { fill: #fff !important; }
+
+    /* Slider visible */
+    [data-testid="stSlider"] {
+        padding-top: 8px !important;
+        padding-bottom: 16px !important;
+    }
+    [data-testid="stSlider"] label p {
+        color: #ddd !important;
+        font-weight: 600 !important;
+    }
+    [data-testid="stSlider"] [data-baseweb="slider"] > div > div {
+        background: #e50914 !important;
+    }
+    [data-testid="stSlider"] [data-baseweb="slider"] [role="slider"] {
+        background: #e50914 !important;
+        border-color: #fff !important;
+    }
+
+    /* Button visible & styled */
+    .stButton > button {
+        background: linear-gradient(90deg, #e50914 0%, #ff4b5c 100%) !important;
+        color: #ffffff !important;
+        border-radius: 10px !important;
+        padding: 12px 24px !important;
+        font-weight: 700 !important;
+        font-size: 15px !important;
+        border: 2px solid rgba(255,120,130,0.5) !important;
+        box-shadow: 0 4px 16px rgba(229,9,20,0.4) !important;
+        transition: transform 0.2s, box-shadow 0.2s !important;
+    }
+    .stButton > button:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 6px 24px rgba(229,9,20,0.6) !important;
+    }
+
+    /* Caption text */
+    .stCaption, [data-testid="stCaption"] {
+        color: #aaa !important;
+    }
     </style>
     """,
     unsafe_allow_html=True,

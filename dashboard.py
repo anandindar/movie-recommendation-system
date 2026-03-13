@@ -1,4 +1,6 @@
 import streamlit as st
+import sys
+from pathlib import Path
 from utils import load_frontend_images, build_background, background_css, VALID_USERNAME, VALID_PASSWORD
 
 st.set_page_config(page_title="Movie Recommendation System – Login", layout="wide")
@@ -22,7 +24,7 @@ st.markdown(f"""
 .header-title {{
     font-size: clamp(20px, 2.6vw, 38px);
     font-weight: 900;
-    margin: 0 0 32px 0;
+    margin: 0 auto 32px auto;
     letter-spacing: 4px;
     line-height: 1.2;
     font-family: 'Bebas Neue', sans-serif;
@@ -30,6 +32,15 @@ st.markdown(f"""
     -webkit-text-fill-color: #ffffff !important;
     text-shadow: 0 3px 15px rgba(0,0,0,1), 0 0 20px rgba(229,9,20,0.8);
     animation: titleGlow 2.2s ease-in-out infinite alternate;
+    /* ── Border box ── */
+    display: inline-block;
+    padding: 16px 40px;
+    border: 3px solid rgba(229, 9, 20, 0.85);
+    border-radius: 16px;
+    background: rgba(8, 12, 24, 0.75);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    box-shadow: 0 6px 30px rgba(0,0,0,0.6), 0 0 25px rgba(229,9,20,0.35);
 }}
 
 @keyframes titleGlow {{
@@ -51,8 +62,8 @@ st.markdown(f"""
 }}
 
 .welcome-box {{
-    background: rgba(8, 12, 24, 0.80) !important;
-    border: 2px solid rgba(229, 9, 20, 0.75) !important;
+    background: rgba(16, 24, 46, 0.88) !important;
+    border: 2px solid rgba(255, 116, 132, 0.90) !important;
     border-radius: 20px;
     padding: 30px 32px 24px 32px;
     margin-bottom: 20px;
@@ -80,13 +91,13 @@ st.markdown(f"""
 }}
 
 .field-label {{
-    color: #ffffff !important;
+    color: #f8fbff !important;
     -webkit-text-fill-color: #ffffff !important;
     font-size: 16px;
     font-weight: 900;
     letter-spacing: 0.5px;
     text-shadow: 0 2px 8px rgba(0,0,0,0.8);
-    background: rgba(6, 10, 20, 0.24);
+    background: rgba(34, 48, 84, 0.74);
     padding: 4px 8px;
     border-radius: 8px;
     display: inline-block;
@@ -134,30 +145,30 @@ div[data-testid="stTextInput"] [data-baseweb="base-input"]::after {{
 }}
 
 div[data-testid="stTextInput"] input {{
-    background: rgba(14, 20, 42, 0.85) !important;
-    color: #ffffff !important;
-    -webkit-text-fill-color: #ffffff !important;
+    background: rgba(44, 62, 108, 0.92) !important;
+    color: #fbfdff !important;
+    -webkit-text-fill-color: #fbfdff !important;
     caret-color: #ffffff !important;
-    border: 1.5px solid rgba(255, 180, 200, 0.75) !important;
+    border: 1.8px solid rgba(255, 206, 216, 0.98) !important;
     border-radius: 12px !important;
     padding: 13px 16px !important;
     font-size: 16px !important;
     font-family: 'Poppins', sans-serif !important;
     width: 100% !important;
-    box-shadow: 0 4px 18px rgba(0,0,0,0.35) !important;
+    box-shadow: 0 6px 22px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.12) !important;
     transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
     display: block !important;
 }}
 
 div[data-testid="stTextInput"] input:focus {{
-    background: rgba(18, 26, 52, 0.90) !important;
-    border-color: rgba(255, 220, 230, 0.95) !important;
-    box-shadow: 0 0 0 2px rgba(229,9,20,0.30), 0 4px 20px rgba(0,0,0,0.40) !important;
+    background: rgba(56, 78, 132, 0.96) !important;
+    border-color: rgba(255, 230, 236, 1) !important;
+    box-shadow: 0 0 0 2px rgba(229,9,20,0.34), 0 8px 24px rgba(0,0,0,0.46) !important;
     outline: none !important;
 }}
 
 div[data-testid="stTextInput"] input::placeholder {{
-    color: rgba(220, 220, 240, 0.55) !important;
+    color: rgba(243, 248, 255, 0.78) !important;
     opacity: 1 !important;
 }}
 
@@ -292,13 +303,11 @@ if "logged_in" not in st.session_state:
 if "username" not in st.session_state:
     st.session_state.username = ""
 
-# ── Already logged in → run the app page via st.navigation (no switch_page) ─
+# ── Already logged in → run the app page directly ───────────────────────────
 if st.session_state.logged_in:
-    pg = st.navigation(
-        [st.Page("pages/app.py", title="Movies", icon="🎬")],
-        position="hidden",
-    )
-    pg.run()
+    # Run the app.py module
+    sys.path.insert(0, str(Path(__file__).parent))
+    exec(open(Path(__file__).parent / "pages" / "app.py", encoding="utf-8").read())
     st.stop()
 
 # ── Render background ───────────────────────────────────────────────────────
@@ -307,8 +316,9 @@ if background_html:
 
 # ── Page heading ────────────────────────────────────────────────────────────
 st.markdown(
-    "<h1 class='header-title' style='text-align:center;'>"
-    "🎬 MOVIES RECOMMENDATION SYSTEM 🎬</h1>",
+    "<div style='text-align:center; width:100%; margin-bottom:36px;'>"
+    "<h1 class='header-title'>"
+    "🎬 MOVIES RECOMMENDATION SYSTEM 🎬</h1></div>",
     unsafe_allow_html=True,
 )
 
