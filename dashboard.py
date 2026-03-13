@@ -143,30 +143,30 @@ div[data-testid="stTextInput"] [data-baseweb="base-input"]::after {{
 }}
 
 div[data-testid="stTextInput"] input {{
-    background: rgba(44, 62, 108, 0.92) !important;
-    color: #fbfdff !important;
-    -webkit-text-fill-color: #fbfdff !important;
+    background: rgba(0, 0, 0, 0.95) !important;
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
     caret-color: #ffffff !important;
-    border: 1.8px solid rgba(255, 206, 216, 0.98) !important;
+    border: 2px solid rgba(229, 9, 20, 0.9) !important;
     border-radius: 12px !important;
-    padding: 13px 16px !important;
+    padding: 14px 16px !important;
     font-size: 16px !important;
     font-family: 'Poppins', sans-serif !important;
     width: 100% !important;
-    box-shadow: 0 6px 22px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.12) !important;
+    box-shadow: 0 8px 28px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.15) !important;
     transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
     display: block !important;
 }}
 
 div[data-testid="stTextInput"] input:focus {{
-    background: rgba(56, 78, 132, 0.96) !important;
-    border-color: rgba(255, 230, 236, 1) !important;
-    box-shadow: 0 0 0 2px rgba(229,9,20,0.34), 0 8px 24px rgba(0,0,0,0.46) !important;
+    background: rgba(10, 10, 20, 0.98) !important;
+    border-color: rgba(255, 220, 226, 1) !important;
+    box-shadow: 0 0 0 3px rgba(229,9,20,0.4), 0 10px 30px rgba(0,0,0,0.7) !important;
     outline: none !important;
 }}
 
 div[data-testid="stTextInput"] input::placeholder {{
-    color: rgba(243, 248, 255, 0.78) !important;
+    color: #e0e0e0 !important;
     opacity: 1 !important;
 }}
 
@@ -327,10 +327,10 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-st.markdown("<div class='field-label' style='margin-bottom:8px;'>👤 USERNAME</div>", unsafe_allow_html=True)
+st.markdown("<div class='field-label' style='margin-bottom:8px; color:#ffffff !important; font-size:18px; font-weight:900; text-shadow:0 2px 8px rgba(0,0,0,0.8);'>👤 USERNAME</div>", unsafe_allow_html=True)
 username = st.text_input("", key="login_username", label_visibility="collapsed")
 
-st.markdown("<div class='field-label' style='margin-bottom:8px; margin-top:14px;'>🔑 PASSWORD</div>", unsafe_allow_html=True)
+st.markdown("<div class='field-label' style='margin-bottom:8px; margin-top:14px; color:#ffffff !important; font-size:18px; font-weight:900; text-shadow:0 2px 8px rgba(0,0,0,0.8);'>🔑 PASSWORD</div>", unsafe_allow_html=True)
 password = st.text_input("", key="login_password", type="password", label_visibility="collapsed")
 
 if st.button("Login"):
