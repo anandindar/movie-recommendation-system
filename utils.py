@@ -1,6 +1,9 @@
-import math
 import base64
+import math
+from io import BytesIO
 from pathlib import Path
+
+from PIL import Image
 
 OMDB_API_KEY = "e09f8ad5"
 
@@ -9,8 +12,25 @@ VALID_USERNAME = "anand@0814"
 VALID_PASSWORD = "Tamkuhi@274407"
 
 
+def _encode_image_for_background(img_file: Path, max_size=(420, 620), quality=72):
+    """Resize and compress a poster so the login page remains lightweight."""
+    with Image.open(img_file) as image:
+        if image.mode not in ("RGB", "L"):
+            background = Image.new("RGB", image.size, (8, 10, 18))
+            alpha = image.split()[-1] if "A" in image.getbands() else None
+            background.paste(image.convert("RGB"), mask=alpha)
+            image = background
+        else:
+            image = image.convert("RGB")
+
+        image.thumbnail(max_size)
+        buffer = BytesIO()
+        image.save(buffer, format="JPEG", quality=quality, optimize=True)
+        return base64.b64encode(buffer.getvalue()).decode()
+
+
 def load_frontend_images():
-    """Load and base64-encode all poster images from the frontend/ folder."""
+    """Load poster images from frontend/ and compress them for page background use."""
     frontend_path = Path("frontend")
     images_data = []
 
@@ -18,15 +38,9 @@ def load_frontend_images():
         for img_file in sorted(frontend_path.glob("*")):
             if img_file.suffix.lower() in [".jpg", ".jpeg", ".png", ".webp"]:
                 try:
-                    with open(img_file, "rb") as f:
-                        img_base64 = base64.b64encode(f.read()).decode()
-                    mime_type = (
-                        "image/jpeg"
-                        if img_file.suffix.lower() in [".jpg", ".jpeg"]
-                        else f"image/{img_file.suffix.lower().strip('.')}"
-                    )
+                    img_base64 = _encode_image_for_background(img_file)
                     images_data.append(
-                        {"name": img_file.stem, "data": img_base64, "mime": mime_type}
+                        {"name": img_file.stem, "data": img_base64, "mime": "image/jpeg"}
                     )
                 except Exception as e:
                     print(f"Error loading {img_file}: {e}")
@@ -51,19 +65,12 @@ def build_background(movie_images):
 
     total_images = len(movie_images)
 
-    # ── Fixed layouts tuned to fill every common screen size ──────────────
-    # Desktop  (>1200px): 7 cols × 5 rows = 35 cells  → covers 4K & ultrawide
-    # Tablet   (≤1200px): 5 cols × 6 rows = 30 cells
-    # Mobile   (≤640px) : 3 cols × 8 rows = 24 cells
-    LAYOUTS = {
-        "desktop": (7, 5),
-        "md":      (5, 6),
-        "sm":      (3, 8),
-    }
-
-    dc, dr = LAYOUTS["desktop"]
-    mc, mr = LAYOUTS["md"]
-    sc, sr = LAYOUTS["sm"]
+    dc = max(4, min(6, math.ceil(math.sqrt(total_images))))
+    dr = math.ceil(total_images / dc)
+    mc = max(3, min(4, dc - 1))
+    mr = math.ceil(total_images / mc)
+    sc = 2 if total_images > 2 else 1
+    sr = math.ceil(total_images / sc)
 
     grid_layout_css = (
         f"--bg-cols: {dc}; --bg-rows: {dr}; "
@@ -71,15 +78,11 @@ def build_background(movie_images):
         f"--bg-cols-sm: {sc}; --bg-rows-sm: {sr};"
     )
 
-    # Tile just enough images to satisfy the largest breakpoint slot count.
-    # Images cycle (modulo) so no blank cells even with fewer source images.
-    total_slots = max(dc * dr, mc * mr, sc * sr)
-    tiled = [movie_images[i % total_images] for i in range(total_slots)]
     cells = [
         f"<div class='bg-cell'>"
         f"<img src='data:{img['mime']};base64,{img['data']}' alt='{img['name']}'/>"
         f"</div>"
-        for img in tiled
+        for img in movie_images
     ]
 
     background_html = (
