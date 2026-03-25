@@ -324,9 +324,13 @@ if page == "📊 Dashboard":
     with col2:
         st.markdown("#### 🎭 Top 10 Genres")
         genre_data = movies_df['genres'].str.split('|').explode().value_counts().head(10)
-        fig = px.barh(x=genre_data.values, y=genre_data.index, 
-                      color_discrete_sequence=["#ff4b5c"],
-                      labels={'x': 'Count', 'y': 'Genre'})
+        fig = px.bar(
+            x=genre_data.values,
+            y=genre_data.index,
+            orientation='h',
+            color_discrete_sequence=["#ff4b5c"],
+            labels={'x': 'Count', 'y': 'Genre'}
+        )
         fig.update_layout(
             template="plotly_dark",
             plot_bgcolor='rgba(16,24,46,0.5)',
