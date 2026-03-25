@@ -200,6 +200,11 @@ movies_df, ratings_df, tags_df = load_data()
 if movies_df is None:
     st.stop()
 
+recommendable_movie_ids = set(ratings_df["movieId"].unique())
+recommendable_titles = movies_df.loc[
+    movies_df["movieId"].isin(recommendable_movie_ids), "title"
+].sort_values().tolist()
+
 # Get Recommendations
 @st.cache_data
 def get_recommendations(movie_id, n=6):
@@ -321,9 +326,12 @@ if page == "📊 Dashboard":
 elif page == "🎯 Recommendations":
     st.markdown('<h2 class="section-header">🎯 Get Movie Recommendations</h2>', unsafe_allow_html=True)
     
+    st.caption(
+        f"Recommendations are available for {len(recommendable_titles):,} titles with rating history."
+    )
     col1, col2 = st.columns([3, 1])
     with col1:
-        movie_title = st.selectbox("Select a movie you like:", movies_df['title'].values)
+        movie_title = st.selectbox("Select a movie you like:", recommendable_titles)
     with col2:
         num_recommendations = st.number_input("How many?", min_value=3, max_value=12, value=6)
     

@@ -245,6 +245,10 @@ def build_similarity(ratings):
 
 ratings, movies, links = load_data()
 similarity_df = build_similarity(ratings)
+recommendable_movie_ids = set(similarity_df.columns.tolist())
+recommendable_titles = sorted(
+    movies.loc[movies["movieId"].isin(recommendable_movie_ids), "title"].tolist()
+)
 
 # ── Helpers ────────────────────────────────────────────────────────────────────
 DEFAULT_POSTER = "https://placehold.co/300x450/1a1a1a/555?text=No+Poster"
@@ -280,6 +284,9 @@ def clean_title(title: str) -> str:
 
 
 def recommend(movie_id, top_n=5):
+    if movie_id not in similarity_df.columns:
+        return pd.DataFrame(columns=["movieId", "title", "genres"])
+
     scores  = similarity_df[movie_id].sort_values(ascending=False)
     top_ids = scores.iloc[1 : top_n + 1].index
     return movies[movies["movieId"].isin(top_ids)][["movieId", "title", "genres"]]
@@ -318,7 +325,9 @@ def build_movie_card(title: str, genres: str, year: str,
 st.markdown("## 🔎 Movie Recommendations")
 
 # ── Search with live suggestions ─────────────────────────────────────────────
-all_titles = sorted(movies["title"].tolist())
+st.caption(
+    f"Recommendations are available for {len(recommendable_titles):,} titles with rating history."
+)
 
 search_query = st.text_input(
     "🔍  Search a movie...",
@@ -329,7 +338,7 @@ search_query = st.text_input(
 selected_movie = None
 if search_query.strip():
     q_lower = search_query.lower()
-    suggestions = [t for t in all_titles if q_lower in t.lower()][:8]
+    suggestions = [t for t in recommendable_titles if q_lower in t.lower()][:8]
     if suggestions:
         # Show a compact selectbox acting as suggestion list
         selected_movie = st.selectbox(
@@ -341,7 +350,7 @@ if search_query.strip():
 else:
     selected_movie = st.selectbox(
         "Or pick from full list",
-        all_titles,
+        recommendable_titles,
     )
 
 num_recommendations = st.slider(
@@ -356,6 +365,10 @@ if st.button("🎬  Get Recommendations", use_container_width=True):
         else:
             movie_id = movie_id_val[0]
             recs = recommend(movie_id, top_n=num_recommendations)
+            if recs.empty:
+                st.info(
+                    "This movie does not have enough rating data yet to generate similar recommendations."
+                )
 
             st.markdown("### Recommended Movies")
 
