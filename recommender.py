@@ -1,4 +1,4 @@
-import pandas as pd
+﻿import pandas as pd
 from sklearn.metrics.pairwise import cosine_similarity
 
 # Load data
@@ -12,7 +12,7 @@ matrix = ratings.pivot_table(
     values="rating"
 ).fillna(0)
 
-print("Matrix Ready ✅")
+print("Matrix Ready")
 
 # Movie similarity (transpose for movie-based filtering)
 movie_similarity = cosine_similarity(matrix.T)
@@ -23,7 +23,7 @@ similarity_df = pd.DataFrame(
     columns=matrix.columns
 )
 
-print("Similarity Matrix Created ✅")
+print("Similarity Matrix Created")
 
 
 # ----------- Recommend Function -----------
