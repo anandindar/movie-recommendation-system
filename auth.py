@@ -42,8 +42,10 @@ def init_db():
         conn.close()
         
     except Error as e:
-        print(f"Error initializing database: {e}")
-        st.error(f"❌ Database Connection Error: {str(e)}\n\nPlease ensure MySQL is running and credentials in config.py are correct.")
+        print(f"❌ Error initializing database: {e}")
+        print(f"Please ensure MySQL is running and credentials in config.py are correct.")
+        return False
+    return True
 
 def hash_password(password):
     """Hash a password using SHA-256"""
@@ -185,6 +187,3 @@ def get_user_info(username):
     except Error as e:
         print(f"Error getting user info: {e}")
         return None
-
-# Initialize database on module load
-init_db()

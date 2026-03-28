@@ -1,6 +1,6 @@
 import streamlit as st
 from utils import load_frontend_images, build_background, background_css, VALID_USERNAME, VALID_PASSWORD
-from auth import authenticate_user, register_user
+from auth import authenticate_user, register_user, init_db
 
 st.set_page_config(page_title="Movie Recommendation System – Login", layout="wide")
 
@@ -304,6 +304,13 @@ section.main > div > div {{
 }}
 </style>
 """, unsafe_allow_html=True)
+
+# ── Initialize database ─────────────────────────────────────────────────────
+if "db_initialized" not in st.session_state:
+    success = init_db()
+    st.session_state.db_initialized = True
+    if not success:
+        st.error("❌ Cannot connect to MySQL. Please check config.py and ensure MySQL is running.")
 
 # ── Session state defaults ──────────────────────────────────────────────────
 if "logged_in" not in st.session_state:
