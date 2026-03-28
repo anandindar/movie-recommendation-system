@@ -57,7 +57,8 @@ def init_db():
         conn = mysql.connector.connect(
             host=MYSQL_CONFIG['host'],
             user=MYSQL_CONFIG['user'],
-            password=MYSQL_CONFIG['password']
+            password=MYSQL_CONFIG['password'],
+            port=MYSQL_CONFIG.get('port', 3306)
         )
         cursor = conn.cursor()
         
@@ -99,7 +100,8 @@ def get_db_connection():
             host=MYSQL_CONFIG['host'],
             user=MYSQL_CONFIG['user'],
             password=MYSQL_CONFIG['password'],
-            database=MYSQL_CONFIG['database']
+            database=MYSQL_CONFIG['database'],
+            port=MYSQL_CONFIG.get('port', 3306)
         )
     except Error as e:
         st.error(f"❌ Database Connection Error: {str(e)}")
