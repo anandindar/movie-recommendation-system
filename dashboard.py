@@ -120,14 +120,14 @@ body, html, [data-testid="stAppViewContainer"], [data-testid="stSidebarNav"] {{
 
 /* Form container */
 .form-container {{
-    background: linear-gradient(145deg, rgba(5, 8, 20, 0.94), rgba(15, 10, 30, 0.92));
-    border: 1px solid rgba(139, 92, 246, 0.5);
-    border-radius: 20px;
-    padding: 40px 36px;
-    backdrop-filter: blur(10px);
-    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.75);
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    padding: 0;
+    backdrop-filter: none;
+    box-shadow: none;
     max-width: 500px;
-    margin: 30px auto 10px auto;
+    margin: 24px auto 12px auto;
 }}
 
 /* Form title */
