@@ -1,21 +1,45 @@
 """Movie Recommendation System - Login/Signup Dashboard"""
 import streamlit as st
 from auth import authenticate_user, register_user, init_db
+import base64
+from pathlib import Path
 
 st.set_page_config(page_title="Movie Recommendation System", layout="wide")
 
-# ── Netflix-style CSS Styling ────────────────────────────────────────────────
-st.markdown("""
+# ── Load and encode background image ──────────────────────────────────────────
+def get_image_as_base64(image_path):
+    """Convert image to base64 for CSS background"""
+    try:
+        with open(image_path, "rb") as image_file:
+            return base64.b64encode(image_file.read()).decode()
+    except:
+        return None
+
+# Try to load Avenger.jpg from frontend folder
+image_path = Path("frontend/Avenger.jpg")
+if image_path.exists():
+    image_base64 = get_image_as_base64(str(image_path))
+else:
+    image_base64 = None
+
+# ── Netflix-style CSS Styling with Background Image ──────────────────────────
+if image_base64:
+    background_image = f"data:image/jpeg;base64,{image_base64}"
+    background_css = f"background: linear-gradient(135deg, rgba(5, 8, 20, 0.9) 0%, rgba(26, 31, 53, 0.9) 50%, rgba(45, 27, 78, 0.9) 100%), url('{background_image}'); background-size: cover; background-position: center; background-attachment: fixed;"
+else:
+    background_css = "background: linear-gradient(135deg, #050814 0%, #1a1f35 50%, #2d1b4e 100%);"
+
+css_styles = """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@400;500;600;700;800&display=swap');
 
-/* Main background gradient */
+/* Main background with image */
 body, html, [data-testid="stAppViewContainer"], [data-testid="stSidebarNav"] {
-    background: linear-gradient(135deg, #050814 0%, #1a1f35 50%, #2d1b4e 100%) !important;
+    """ + background_css + """ !important;
 }
 
 .main {
-    background: linear-gradient(135deg, #050814 0%, #1a1f35 50%, #2d1b4e 100%) !important;
+    """ + background_css + """ !important;
 }
 
 [data-testid="stAppViewContainer"] {
@@ -166,7 +190,9 @@ hr {
 }
 
 </style>
-""", unsafe_allow_html=True)
+"""
+
+st.markdown(css_styles, unsafe_allow_html=True)
 
 # Init DB
 if "db_initialized" not in st.session_state:
