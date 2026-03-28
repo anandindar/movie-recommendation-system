@@ -4,38 +4,48 @@ from auth import authenticate_user, register_user, init_db
 import base64
 import os
 from pathlib import Path
+import random
 
 st.set_page_config(page_title="Movie Recommendation System", layout="wide")
 
 # ── Load and encode background image ──────────────────────────────────────────
-def get_image_as_base64(image_path):
-    """Convert image to base64 for CSS background"""
+def get_image_as_base64(image_path: str) -> str | None:
+    """Convert image to base64 for CSS background.
+
+    Returns None if the file doesn't exist or can't be read.
+    """
     try:
         if os.path.exists(image_path):
             with open(image_path, "rb") as image_file:
-                return base64.b64encode(image_file.read()).decode()
-    except Exception as e:
-        pass
+                return base64.b64encode(image_file.read()).decode("utf-8")
+    except Exception:
+        return None
     return None
 
-# Try multiple paths to find the image
-possible_paths = [
-    "frontend/Avenger.jpg",
-    "./frontend/Avenger.jpg",
-    os.path.join(os.path.dirname(__file__), "frontend", "Avenger.jpg"),
-]
 
-image_base64 = None
-for path in possible_paths:
-    if os.path.exists(path):
-        image_base64 = get_image_as_base64(path)
-        if image_base64:
-            break
+def pick_random_background_image() -> str | None:
+    """Pick a random image from the frontend folder and return it as base64."""
+    frontend_dir = Path(__file__).resolve().parent / "frontend"
+    if not frontend_dir.exists():
+        return None
 
-# ── Build CSS with or without background image ──────────────────────────────
+    image_files = []
+    for pattern in ("*.jpg", "*.jpeg", "*.png", "*.webp"):
+        image_files.extend(frontend_dir.glob(pattern))
+
+    if not image_files:
+        return None
+
+    chosen = random.choice(image_files)
+    return get_image_as_base64(str(chosen))
+
+
+# Choose one of the available images (or fall back to gradient only)
+image_base64 = pick_random_background_image()
+
 if image_base64:
     bg_style = f"""
-    background: linear-gradient(135deg, rgba(5, 8, 20, 0.92) 0%, rgba(26, 31, 53, 0.92) 50%, rgba(45, 27, 78, 0.92) 100%), 
+    background: linear-gradient(135deg, rgba(5, 8, 20, 0.78) 0%, rgba(26, 31, 53, 0.78) 50%, rgba(45, 27, 78, 0.78) 100%),
                 url('data:image/jpeg;base64,{image_base64}');
     background-size: cover;
     background-position: center;
@@ -44,17 +54,6 @@ if image_base64:
 else:
     bg_style = "background: linear-gradient(135deg, #050814 0%, #1a1f35 50%, #2d1b4e 100%);"
 
-# ── Build CSS with or without background image ──────────────────────────────
-if image_base64:
-    bg_style = f"""
-    background: linear-gradient(135deg, rgba(5, 8, 20, 0.92) 0%, rgba(26, 31, 53, 0.92) 50%, rgba(45, 27, 78, 0.92) 100%), 
-                url('data:image/jpeg;base64,{image_base64}');
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
-    """
-else:
-    bg_style = "background: linear-gradient(135deg, #050814 0%, #1a1f35 50%, #2d1b4e 100%);"
 
 css_template = f"""
 <style>
