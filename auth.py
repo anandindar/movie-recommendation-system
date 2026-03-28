@@ -14,7 +14,8 @@ MYSQL_CONFIG = {
     'host': 'localhost',
     'user': 'root',
     'password': '',
-    'database': 'movie_recommendation_db'
+    'database': 'movie_recommendation_db',
+    'port': 3306
 }
 
 # Try Streamlit Cloud secrets first
@@ -24,7 +25,8 @@ try:
             'host': st.secrets['MYSQL_HOST'],
             'user': st.secrets['MYSQL_USER'],
             'password': st.secrets['MYSQL_PASSWORD'],
-            'database': st.secrets['MYSQL_DATABASE']
+            'database': st.secrets['MYSQL_DATABASE'],
+            'port': st.secrets.get('MYSQL_PORT', 3306)
         }
 except Exception:
     pass
@@ -35,7 +37,8 @@ if 'MYSQL_HOST' in os.environ:
         'host': os.getenv('MYSQL_HOST'),
         'user': os.getenv('MYSQL_USER'),
         'password': os.getenv('MYSQL_PASSWORD'),
-        'database': os.getenv('MYSQL_DATABASE')
+        'database': os.getenv('MYSQL_DATABASE'),
+        'port': int(os.getenv('MYSQL_PORT', 3306))
     }
 
 # Try config.py (local development)
