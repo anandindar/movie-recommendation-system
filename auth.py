@@ -18,7 +18,24 @@ MYSQL_CONFIG = {
     'port': 3306
 }
 
-# Try Streamlit Cloud secrets first
+# Try Streamlit Cloud connection string first (better for Railway)
+try:
+    if st.secrets and 'MYSQL_CONNECTION_STRING' in st.secrets:
+        conn_str = st.secrets['MYSQL_CONNECTION_STRING']
+        # Parse: mysql://user:password@host:port/database
+        import urllib.parse
+        parsed = urllib.parse.urlparse(conn_str)
+        MYSQL_CONFIG = {
+            'host': parsed.hostname,
+            'user': parsed.username,
+            'password': parsed.password,
+            'database': parsed.path.lstrip('/'),
+            'port': parsed.port or 3306
+        }
+except Exception:
+    pass
+
+# Try Streamlit Cloud individual secrets if connection string not available
 try:
     if st.secrets and 'MYSQL_HOST' in st.secrets:
         MYSQL_CONFIG = {
