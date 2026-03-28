@@ -9,17 +9,43 @@ import hashlib
 import streamlit as st
 import os
 
-# Load configuration from environment variables or config.py
+# Load configuration - Priority: Streamlit secrets > Environment variables > config.py (local)
+MYSQL_CONFIG = {
+    'host': 'localhost',
+    'user': 'root',
+    'password': '',
+    'database': 'movie_recommendation_db'
+}
+
+# Try Streamlit Cloud secrets first
 try:
-    from config import MYSQL_CONFIG
-except ImportError:
-    # Use environment variables if config.py doesn't exist (for Streamlit Cloud)
+    if st.secrets and 'MYSQL_HOST' in st.secrets:
+        MYSQL_CONFIG = {
+            'host': st.secrets['MYSQL_HOST'],
+            'user': st.secrets['MYSQL_USER'],
+            'password': st.secrets['MYSQL_PASSWORD'],
+            'database': st.secrets['MYSQL_DATABASE']
+        }
+except Exception:
+    pass
+
+# Try environment variables
+if 'MYSQL_HOST' in os.environ:
     MYSQL_CONFIG = {
-        'host': os.getenv('MYSQL_HOST', 'localhost'),
-        'user': os.getenv('MYSQL_USER', 'root'),
-        'password': os.getenv('MYSQL_PASSWORD', ''),
-        'database': os.getenv('MYSQL_DATABASE', 'movie_recommendation_db')
+        'host': os.getenv('MYSQL_HOST'),
+        'user': os.getenv('MYSQL_USER'),
+        'password': os.getenv('MYSQL_PASSWORD'),
+        'database': os.getenv('MYSQL_DATABASE')
     }
+
+# Try config.py (local development)
+try:
+    from config import MYSQL_CONFIG as CONFIG_FILE
+    # Only use config.py if environment variables weren't set
+    if 'MYSQL_HOST' not in os.environ:
+        MYSQL_CONFIG = CONFIG_FILE
+except ImportError:
+    pass
 
 def init_db():
     """Initialize the MySQL database with users table if it doesn't exist"""
