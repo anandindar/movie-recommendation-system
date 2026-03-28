@@ -4,48 +4,70 @@ from auth import authenticate_user, register_user, init_db
 import base64
 import os
 from pathlib import Path
-import random
+from math import ceil
+from PIL import Image
 
 st.set_page_config(page_title="Movie Recommendation System", layout="wide")
 
-# ── Load and encode background image ──────────────────────────────────────────
-def get_image_as_base64(image_path: str) -> str | None:
-    """Convert image to base64 for CSS background.
 
-    Returns None if the file doesn't exist or can't be read.
+def get_image_as_base64(image: Image.Image) -> str:
+    """Encode a PIL image to base64 string."""
+    from io import BytesIO
+
+    buffer = BytesIO()
+    image.save(buffer, format="JPEG", quality=85)
+    return base64.b64encode(buffer.getvalue()).decode("utf-8")
+
+
+@st.cache_resource(show_spinner=False)
+def build_collage_base64(tile_width: int = 480, tile_height: int = 720) -> str | None:
+    """Build a collage from all images in the frontend folder and return base64.
+
+    This uses every poster you placed in the frontend/ directory and
+    arranges them in a grid so the background is rich and works on both
+    laptop and mobile (background-size: cover handles responsiveness).
     """
-    try:
-        if os.path.exists(image_path):
-            with open(image_path, "rb") as image_file:
-                return base64.b64encode(image_file.read()).decode("utf-8")
-    except Exception:
-        return None
-    return None
-
-
-def pick_random_background_image() -> str | None:
-    """Pick a random image from the frontend folder and return it as base64."""
     frontend_dir = Path(__file__).resolve().parent / "frontend"
     if not frontend_dir.exists():
         return None
 
-    image_files = []
+    image_paths: list[Path] = []
     for pattern in ("*.jpg", "*.jpeg", "*.png", "*.webp"):
-        image_files.extend(frontend_dir.glob(pattern))
+        image_paths.extend(frontend_dir.glob(pattern))
 
-    if not image_files:
+    if not image_paths:
         return None
 
-    chosen = random.choice(image_files)
-    return get_image_as_base64(str(chosen))
+    # Limit to a reasonable number to avoid huge images
+    image_paths = image_paths[:16]
+
+    cols = min(4, len(image_paths))
+    rows = ceil(len(image_paths) / cols)
+
+    collage = Image.new("RGB", (cols * tile_width, rows * tile_height), (5, 8, 20))
+
+    for idx, path in enumerate(image_paths):
+        try:
+            img = Image.open(path).convert("RGB")
+        except Exception:
+            continue
+
+        img.thumbnail((tile_width, tile_height), Image.LANCZOS)
+        x = (idx % cols) * tile_width
+        y = (idx // cols) * tile_height
+        # Center the thumbnail in its tile
+        offset = ((tile_width - img.width) // 2, (tile_height - img.height) // 2)
+        collage.paste(img, (x + offset[0], y + offset[1]))
+
+    return get_image_as_base64(collage)
 
 
-# Choose one of the available images (or fall back to gradient only)
-image_base64 = pick_random_background_image()
+# Build collage once and reuse it
+image_base64 = build_collage_base64()
 
 if image_base64:
     bg_style = f"""
-    background: linear-gradient(135deg, rgba(5, 8, 20, 0.78) 0%, rgba(26, 31, 53, 0.78) 50%, rgba(45, 27, 78, 0.78) 100%),
+    background: linear-gradient(135deg, rgba(5, 8, 20, 0.80) 0%, rgba(26, 31, 53, 0.80) 50%, rgba(45, 27, 78, 0.80) 100%),
                 url('data:image/jpeg;base64,{image_base64}');
     background-size: cover;
     background-position: center;
