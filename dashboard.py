@@ -1,5 +1,6 @@
 import streamlit as st
 from utils import load_frontend_images, build_background, background_css, VALID_USERNAME, VALID_PASSWORD
+from auth import authenticate_user, register_user
 
 st.set_page_config(page_title="Movie Recommendation System – Login", layout="wide")
 
@@ -175,7 +176,7 @@ div[data-testid="stTextInput"] input::placeholder {{
     opacity: 1 !important;
 }}
 
-/* ── Login button ── */
+/* ── Button styling ── */
 .stButton > button {{
     background: linear-gradient(90deg, #e50914 0%, #ff4b5c 100%) !important;
     color: #ffffff !important;
@@ -204,6 +205,14 @@ div[data-testid="stTextInput"] input::placeholder {{
     border-color: rgba(255,209,213,1.0) !important;
 }}
 
+/* ── Divider styling ── */
+hr {{
+    background: linear-gradient(90deg, transparent, #ff74a8, transparent) !important;
+    border: none !important;
+    height: 2px !important;
+    margin: 12px 0 !important;
+}}
+
 /* ── Centre the entire login form on all screens ── */
 [data-testid="stMainBlockContainer"] {{
     min-height: 100dvh !important;
@@ -212,17 +221,16 @@ div[data-testid="stTextInput"] input::placeholder {{
     align-items: center !important;
     justify-content: center !important;
     padding: 32px 16px !important;
-    /* override conflicting bottom-padding from mobile fix below */
     padding-bottom: max(env(safe-area-inset-bottom, 16px), 32px) !important;
 }}
-/* Every direct child in the block container gets auto centred */
+
 [data-testid="stMainBlockContainer"] > div,
 [data-testid="stMainBlockContainer"] > div > div {{
     width: 100%;
     max-width: 480px;
     padding-bottom: 0 !important;
 }}
-/* but the header stretches full width */
+
 [data-testid="stMainBlockContainer"] > div:first-child,
 [data-testid="stMainBlockContainer"] > div:first-child > div {{
     max-width: 100% !important;
@@ -237,23 +245,24 @@ div[data-testid="stTextInput"] input::placeholder {{
     .login-subtitle {{ font-size: 14px !important; }}
     .stButton > button {{ font-size: 16px !important; padding: 12px 14px !important; }}
 }}
+
 @media (max-width: 480px) {{
     .welcome-box {{ padding: 18px 14px 14px 14px !important; }}
     div[data-testid="stTextInput"] input {{ font-size: 15px !important; padding: 12px 14px !important; }}
 }}
 
-/* ── Mobile viewport / scroll fix ── */
+/* ── Mobile viewport fix ── */
 html {{
     background: #050814 !important;
     overflow-y: auto !important;
 }}
+
 body {{
     background: #050814 !important;
     overflow-y: auto !important;
     min-height: 100dvh !important;
 }}
 
-/* Fill the full visible height including mobile browser chrome */
 #root,
 .stApp,
 [data-testid="stApp"],
@@ -268,28 +277,24 @@ section.main {{
     overflow-y: auto !important;
 }}
 
-/* Streamlit's inner scroll container – must not clip */
 section[data-testid="stMain"],
 section.main {{
     overflow-y: auto !important;
     overflow-x: hidden !important;
 }}
 
-/* Main content block – safe-area bottom padding */
 [data-testid="stMainBlockContainer"],
 section.main > div,
 section.main > div > div {{
     overflow: visible !important;
 }}
 
-/* Prevent the background overlay/grid from eating pointer events or scroll */
 .page-bg-grid,
 .page-bg-overlay {{
     pointer-events: none !important;
     touch-action: none !important;
 }}
 
-/* On very small screens ensure form is full-width */
 @media (max-width: 600px) {{
     [data-testid="stMainBlockContainer"] > div,
     [data-testid="stMainBlockContainer"] > div > div {{
@@ -305,11 +310,76 @@ if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 if "username" not in st.session_state:
     st.session_state.username = ""
+if "auth_tab" not in st.session_state:
+    st.session_state.auth_tab = "LOGIN"
 
 # ── Already logged in → go to app page ─────────────────────────────────────
 if st.session_state.logged_in:
     st.switch_page("pages/app.py")
     st.stop()
+
+# ── Login form function ─────────────────────────────────────────────────────
+def login_form():
+    """Render the Login form"""
+    st.markdown("""
+    <div class='welcome-box'>
+        <h1 class='login-title' style='text-align:center;'>🎬 LOGIN 🎬</h1>
+        <p class='login-subtitle' style='text-align:center;'>Welcome back! Please enter your credentials</p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("<div class='field-label' style='margin-bottom:8px; color:#ffffff !important; font-size:18px; font-weight:900; text-shadow:0 2px 8px rgba(0,0,0,0.8);'>👤 USERNAME</div>", unsafe_allow_html=True)
+    username = st.text_input("Username", key="login_username", placeholder="Enter username")
+    
+    st.markdown("<div class='field-label' style='margin-bottom:8px; margin-top:14px; color:#ffffff !important; font-size:18px; font-weight:900; text-shadow:0 2px 8px rgba(0,0,0,0.8);'>🔑 PASSWORD</div>", unsafe_allow_html=True)
+    password = st.text_input("Password", key="login_password", type="password", placeholder="Enter password")
+    
+    if st.button("🔐 LOGIN NOW", key="btn_login", use_container_width=True):
+        success, message = authenticate_user(username, password)
+        if success:
+            st.session_state.logged_in = True
+            st.session_state.username = username
+            st.success(message)
+            st.balloons()
+            st.switch_page("pages/app.py")
+        else:
+            st.error(message)
+
+# ── Sign Up form function ───────────────────────────────────────────────────
+def signup_form():
+    """Render the Sign Up form"""
+    st.markdown("""
+    <div class='welcome-box'>
+        <h1 class='login-title' style='text-align:center;'>📝 CREATE ACCOUNT 📝</h1>
+        <p class='login-subtitle' style='text-align:center;'>Join us and get personalized movie recommendations!</p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("<div class='field-label' style='margin-bottom:8px; color:#ffffff !important; font-size:18px; font-weight:900; text-shadow:0 2px 8px rgba(0,0,0,0.8);'>👤 USERNAME</div>", unsafe_allow_html=True)
+    new_username = st.text_input("Username", key="signup_username", placeholder="Choose a username (min 3 chars)")
+    
+    st.markdown("<div class='field-label' style='margin-bottom:8px; margin-top:14px; color:#ffffff !important; font-size:18px; font-weight:900; text-shadow:0 2px 8px rgba(0,0,0,0.8);'>📧 EMAIL</div>", unsafe_allow_html=True)
+    email = st.text_input("Email", key="signup_email", placeholder="Enter your email address")
+    
+    st.markdown("<div class='field-label' style='margin-bottom:8px; margin-top:14px; color:#ffffff !important; font-size:18px; font-weight:900; text-shadow:0 2px 8px rgba(0,0,0,0.8);'>🔑 PASSWORD</div>", unsafe_allow_html=True)
+    new_password = st.text_input("Password", key="signup_password", type="password", placeholder="Min 6 characters")
+    
+    st.markdown("<div class='field-label' style='margin-bottom:8px; margin-top:14px; color:#ffffff !important; font-size:18px; font-weight:900; text-shadow:0 2px 8px rgba(0,0,0,0.8);'>✓ CONFIRM PASSWORD</div>", unsafe_allow_html=True)
+    confirm_password = st.text_input("Confirm Password", key="signup_confirm", type="password", placeholder="Re-enter password")
+    
+    if st.button("📝 CREATE ACCOUNT", key="btn_signup", use_container_width=True):
+        if new_password != confirm_password:
+            st.error("Passwords do not match! ❌")
+        else:
+            success, message = register_user(new_username, email, new_password)
+            if success:
+                st.success(message)
+                st.info("Switching to login form...")
+                st.balloons()
+                st.session_state.auth_tab = "LOGIN"
+                st.rerun()
+            else:
+                st.error(message)
 
 # ── Render background ───────────────────────────────────────────────────────
 if background_html:
@@ -323,27 +393,28 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# ── Login form (CSS handles centering – no st.columns needed) ──────────────
+# ── Auth form container ─────────────────────────────────────────────────────
 st.markdown("<div class='login-box'>", unsafe_allow_html=True)
-st.markdown("""
-<div class='welcome-box'>
-    <h1 class='login-title' style='text-align:center;'>🎬 LOGIN 🎬</h1>
-    <p class='login-subtitle' style='text-align:center;'>Welcome back! Please enter your credentials</p>
-</div>
-""", unsafe_allow_html=True)
 
-st.markdown("<div class='field-label' style='margin-bottom:8px; color:#ffffff !important; font-size:18px; font-weight:900; text-shadow:0 2px 8px rgba(0,0,0,0.8);'>👤 USERNAME</div>", unsafe_allow_html=True)
-username = st.text_input("Username", key="login_username", placeholder="Enter username")
+# ── Tab selection ───────────────────────────────────────────────────────────
+col1, col2 = st.columns(2)
 
-st.markdown("<div class='field-label' style='margin-bottom:8px; margin-top:14px; color:#ffffff !important; font-size:18px; font-weight:900; text-shadow:0 2px 8px rgba(0,0,0,0.8);'>🔑 PASSWORD</div>", unsafe_allow_html=True)
-password = st.text_input("Password", key="login_password", type="password", placeholder="Enter password")
+with col1:
+    if st.button("🔐 LOGIN", key="tab_login", use_container_width=True):
+        st.session_state.auth_tab = "LOGIN"
+        st.rerun()
 
-if st.button("Login"):
-    if username == VALID_USERNAME and password == VALID_PASSWORD:
-        st.session_state.logged_in = True
-        st.session_state.username = username
-        st.switch_page("pages/app.py")
-    else:
-        st.error("Invalid Credentials ❌")
+with col2:
+    if st.button("📝 SIGN UP", key="tab_signup", use_container_width=True):
+        st.session_state.auth_tab = "SIGNUP"
+        st.rerun()
+
+st.divider()
+
+# ── Render selected form ────────────────────────────────────────────────────
+if st.session_state.auth_tab == "LOGIN":
+    login_form()
+else:
+    signup_form()
 
 st.markdown("</div>", unsafe_allow_html=True)
