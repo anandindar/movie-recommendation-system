@@ -5,7 +5,7 @@ import base64
 import os
 from pathlib import Path
 from math import ceil
-from PIL import Image
+from PIL import Image, ImageOps
 
 st.set_page_config(page_title="Movie Recommendation System", layout="wide")
 
@@ -52,12 +52,11 @@ def build_collage_base64(tile_width: int = 480, tile_height: int = 720) -> str |
         except Exception:
             continue
 
-        img.thumbnail((tile_width, tile_height), Image.LANCZOS)
+        # Fill the tile completely (no gaps) while keeping aspect ratio
+        tile = ImageOps.fit(img, (tile_width, tile_height), Image.LANCZOS)
         x = (idx % cols) * tile_width
         y = (idx // cols) * tile_height
-        # Center the thumbnail in its tile
-        offset = ((tile_width - img.width) // 2, (tile_height - img.height) // 2)
-        collage.paste(img, (x + offset[0], y + offset[1]))
+        collage.paste(tile, (x, y))
 
     return get_image_as_base64(collage)
 
