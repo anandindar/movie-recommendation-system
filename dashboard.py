@@ -41,14 +41,19 @@ if st.session_state.auth_tab == "LOGIN":
     username = st.text_input("Username")
     password = st.text_input("Password", type="password")
     
-    if st.button("Login"):
-        success, msg = authenticate_user(username, password)
-        if success:
-            st.session_state.logged_in = True
-            st.success(msg)
-            st.switch_page("pages/app.py")
+    if st.button("🔐 Login", use_container_width=True):
+        if not username or not password:
+            st.error("Please enter username and password")
         else:
-            st.error(msg)
+            success, msg = authenticate_user(username, password)
+            if success:
+                st.session_state.logged_in = True
+                st.session_state.username = username
+                st.success(msg)
+                st.balloons()
+                st.switch_page("pages/app.py")
+            else:
+                st.error(msg)
 else:
     st.write("## Sign Up Form")
     username = st.text_input("Username", key="su_username")
@@ -56,14 +61,22 @@ else:
     password = st.text_input("Password", key="su_password", type="password")
     confirm = st.text_input("Confirm Password", key="su_confirm", type="password")
     
-    if st.button("Sign Up"):
-        if password != confirm:
+    if st.button("Sign Up", use_container_width=True):
+        if not username or not email or not password:
+            st.error("Please fill in all fields")
+        elif password != confirm:
             st.error("Passwords don't match")
+        elif len(password) < 6:
+            st.error("Password must be at least 6 characters")
         else:
             success, msg = register_user(username, email, password)
             if success:
                 st.success(msg)
-                st.session_state.auth_tab = "LOGIN"
-                st.rerun()
+                st.balloons()
+                # Auto-login after signup
+                st.session_state.logged_in = True
+                st.session_state.username = username
+                st.info("Redirecting to dashboard...")
+                st.switch_page("pages/app.py")
             else:
                 st.error(msg)
