@@ -20,7 +20,7 @@ def get_image_as_base64(image: Image.Image) -> str:
 
 
 @st.cache_resource(show_spinner=False)
-def build_collage_base64(tile_width: int = 320, tile_height: int = 480) -> str | None:
+def build_collage_base64(tile_width: int = 220, tile_height: int = 320) -> str | None:
     """Build a collage from all images in the frontend folder and return base64.
 
     This uses every poster you placed in the frontend/ directory and
@@ -38,7 +38,8 @@ def build_collage_base64(tile_width: int = 320, tile_height: int = 480) -> str |
     if not image_paths:
         return None
 
-    cols = min(4, len(image_paths))
+    # More columns so more posters are visible at once
+    cols = min(6, max(3, len(image_paths)))
     rows = ceil(len(image_paths) / cols)
 
     collage = Image.new("RGB", (cols * tile_width, rows * tile_height), (5, 8, 20))
