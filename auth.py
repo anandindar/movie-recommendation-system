@@ -7,7 +7,19 @@ import mysql.connector
 from mysql.connector import Error
 import hashlib
 import streamlit as st
-from config import MYSQL_CONFIG
+import os
+
+# Load configuration from environment variables or config.py
+try:
+    from config import MYSQL_CONFIG
+except ImportError:
+    # Use environment variables if config.py doesn't exist (for Streamlit Cloud)
+    MYSQL_CONFIG = {
+        'host': os.getenv('MYSQL_HOST', 'localhost'),
+        'user': os.getenv('MYSQL_USER', 'root'),
+        'password': os.getenv('MYSQL_PASSWORD', ''),
+        'database': os.getenv('MYSQL_DATABASE', 'movie_recommendation_db')
+    }
 
 def init_db():
     """Initialize the MySQL database with users table if it doesn't exist"""
