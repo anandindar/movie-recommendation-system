@@ -253,5 +253,3 @@ with form_col2:
                     st.error(f"❌ {msg}")
     
     st.markdown('</div>', unsafe_allow_html=True)
-            else:
-                st.error(msg)
