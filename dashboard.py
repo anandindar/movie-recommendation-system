@@ -2,6 +2,7 @@
 import streamlit as st
 from auth import authenticate_user, register_user, init_db
 import base64
+import os
 from pathlib import Path
 
 st.set_page_config(page_title="Movie Recommendation System", layout="wide")
@@ -10,49 +11,75 @@ st.set_page_config(page_title="Movie Recommendation System", layout="wide")
 def get_image_as_base64(image_path):
     """Convert image to base64 for CSS background"""
     try:
-        with open(image_path, "rb") as image_file:
-            return base64.b64encode(image_file.read()).decode()
-    except:
-        return None
+        if os.path.exists(image_path):
+            with open(image_path, "rb") as image_file:
+                return base64.b64encode(image_file.read()).decode()
+    except Exception as e:
+        pass
+    return None
 
-# Try to load Avenger.jpg from frontend folder
-image_path = Path("frontend/Avenger.jpg")
-if image_path.exists():
-    image_base64 = get_image_as_base64(str(image_path))
-else:
-    image_base64 = None
+# Try multiple paths to find the image
+possible_paths = [
+    "frontend/Avenger.jpg",
+    "./frontend/Avenger.jpg",
+    os.path.join(os.path.dirname(__file__), "frontend", "Avenger.jpg"),
+]
 
-# ── Netflix-style CSS Styling with Background Image ──────────────────────────
+image_base64 = None
+for path in possible_paths:
+    if os.path.exists(path):
+        image_base64 = get_image_as_base64(path)
+        if image_base64:
+            break
+
+# ── Build CSS with or without background image ──────────────────────────────
 if image_base64:
-    background_image = f"data:image/jpeg;base64,{image_base64}"
-    background_css = f"background: linear-gradient(135deg, rgba(5, 8, 20, 0.9) 0%, rgba(26, 31, 53, 0.9) 50%, rgba(45, 27, 78, 0.9) 100%), url('{background_image}'); background-size: cover; background-position: center; background-attachment: fixed;"
+    bg_style = f"""
+    background: linear-gradient(135deg, rgba(5, 8, 20, 0.92) 0%, rgba(26, 31, 53, 0.92) 50%, rgba(45, 27, 78, 0.92) 100%), 
+                url('data:image/jpeg;base64,{image_base64}');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    """
 else:
-    background_css = "background: linear-gradient(135deg, #050814 0%, #1a1f35 50%, #2d1b4e 100%);"
+    bg_style = "background: linear-gradient(135deg, #050814 0%, #1a1f35 50%, #2d1b4e 100%);"
 
-css_styles = """
+# ── Build CSS with or without background image ──────────────────────────────
+if image_base64:
+    bg_style = f"""
+    background: linear-gradient(135deg, rgba(5, 8, 20, 0.92) 0%, rgba(26, 31, 53, 0.92) 50%, rgba(45, 27, 78, 0.92) 100%), 
+                url('data:image/jpeg;base64,{image_base64}');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    """
+else:
+    bg_style = "background: linear-gradient(135deg, #050814 0%, #1a1f35 50%, #2d1b4e 100%);"
+
+css_template = f"""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@400;500;600;700;800&display=swap');
 
-/* Main background with image */
-body, html, [data-testid="stAppViewContainer"], [data-testid="stSidebarNav"] {
-    """ + background_css + """ !important;
-}
+/* Main background */
+body, html, [data-testid="stAppViewContainer"], [data-testid="stSidebarNav"] {{
+    {bg_style} !important;
+}}
 
-.main {
-    """ + background_css + """ !important;
-}
+.main {{
+    {bg_style} !important;
+}}
 
-[data-testid="stAppViewContainer"] {
+[data-testid="stAppViewContainer"] {{
     background-attachment: fixed !important;
-}
+}}
 
 /* Hide sidebar */
-[data-testid="stSidebarNav"] {
+[data-testid="stSidebarNav"] {{
     display: none !important;
-}
+}}
 
 /* Main title styling */
-.main-title {
+.main-title {{
     font-size: 48px;
     font-weight: 800;
     font-family: 'Bebas Neue', sans-serif;
@@ -62,10 +89,10 @@ body, html, [data-testid="stAppViewContainer"], [data-testid="stSidebarNav"] {
     letter-spacing: 2px;
     margin-bottom: 10px;
     text-transform: uppercase;
-}
+}}
 
 /* Form container */
-.form-container {
+.form-container {{
     background: rgba(10, 15, 35, 0.85);
     border: 2px solid rgba(229, 9, 20, 0.5);
     border-radius: 16px;
@@ -74,10 +101,10 @@ body, html, [data-testid="stAppViewContainer"], [data-testid="stSidebarNav"] {
     box-shadow: 0 8px 40px rgba(0, 0, 0, 0.6), 0 0 40px rgba(229, 9, 20, 0.2);
     max-width: 500px;
     margin: 20px auto;
-}
+}}
 
 /* Form title */
-.form-title {
+.form-title {{
     font-size: 28px;
     font-weight: 800;
     font-family: 'Bebas Neue', sans-serif;
@@ -85,11 +112,11 @@ body, html, [data-testid="stAppViewContainer"], [data-testid="stSidebarNav"] {
     text-align: center;
     margin-bottom: 30px;
     letter-spacing: 1px;
-}
+}}
 
 /* Input styling */
 .stTextInput > div > div > input,
-.stTextInput input {
+.stTextInput input {{
     background: rgba(0, 0, 0, 0.9) !important;
     color: #ffffff !important;
     border: 2px solid rgba(229, 9, 20, 0.4) !important;
@@ -97,26 +124,26 @@ body, html, [data-testid="stAppViewContainer"], [data-testid="stSidebarNav"] {
     padding: 12px 16px !important;
     font-family: 'Poppins', sans-serif !important;
     font-size: 14px !important;
-}
+}}
 
 .stTextInput > div > div > input:focus,
-.stTextInput input:focus {
+.stTextInput input:focus {{
     border-color: rgba(229, 9, 20, 0.8) !important;
     box-shadow: 0 0 12px rgba(229, 9, 20, 0.3) !important;
-}
+}}
 
 /* Label styling */
-.stTextInput > label, label {
+.stTextInput > label, label {{
     color: #b8c5d6 !important;
     font-family: 'Poppins', sans-serif !important;
     font-weight: 600 !important;
     font-size: 13px !important;
     text-transform: uppercase !important;
     letter-spacing: 0.5px !important;
-}
+}}
 
 /* Button styling */
-.stButton > button {
+.stButton > button {{
     background: linear-gradient(90deg, #e50914 0%, #ff4b5c 100%) !important;
     color: #ffffff !important;
     border: none !important;
@@ -130,16 +157,16 @@ body, html, [data-testid="stAppViewContainer"], [data-testid="stSidebarNav"] {
     transition: all 0.3s ease !important;
     width: 100% !important;
     font-size: 14px !important;
-}
+}}
 
-.stButton > button:hover {
+.stButton > button:hover {{
     background: linear-gradient(90deg, #ff4b5c 0%, #e50914 100%) !important;
     box-shadow: 0 8px 24px rgba(229, 9, 20, 0.7) !important;
     transform: translateY(-2px) !important;
-}
+}}
 
 /* Tab buttons styling */
-.tab-button {
+.tab-button {{
     background: rgba(229, 9, 20, 0.8) !important;
     color: white !important;
     border: none !important;
@@ -148,51 +175,51 @@ body, html, [data-testid="stAppViewContainer"], [data-testid="stSidebarNav"] {
     margin: 5px !important;
     font-weight: 700 !important;
     font-family: 'Poppins', sans-serif !important;
-}
+}}
 
 /* Divider styling */
-hr {
+hr {{
     border: 1px solid rgba(229, 9, 20, 0.3) !important;
     margin: 30px 0 !important;
-}
+}}
 
 /* Success/Error messages */
-.stSuccess {
+.stSuccess {{
     background: rgba(0, 200, 100, 0.15) !important;
     border: 1px solid rgba(0, 200, 100, 0.5) !important;
     border-radius: 8px !important;
     color: #00ff7f !important;
-}
+}}
 
-.stError {
+.stError {{
     background: rgba(229, 9, 20, 0.15) !important;
     border: 1px solid rgba(229, 9, 20, 0.5) !important;
     border-radius: 8px !important;
     color: #ff6b9d !important;
-}
+}}
 
-.stInfo {
+.stInfo {{
     background: rgba(100, 150, 255, 0.15) !important;
     border: 1px solid rgba(100, 150, 255, 0.5) !important;
     border-radius: 8px !important;
     color: #88ccff !important;
-}
+}}
 
 /* Responsive */
-@media (max-width: 768px) {
-    .main-title {
+@media (max-width: 768px) {{
+    .main-title {{
         font-size: 32px !important;
-    }
-    .form-container {
+    }}
+    .form-container {{
         padding: 24px !important;
         margin: 10px !important;
-    }
-}
+    }}
+}}
 
 </style>
 """
 
-st.markdown(css_styles, unsafe_allow_html=True)
+st.markdown(css_template, unsafe_allow_html=True)
 
 # Init DB
 if "db_initialized" not in st.session_state:
