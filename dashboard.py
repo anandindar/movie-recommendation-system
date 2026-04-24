@@ -1,13 +1,16 @@
 """Movie Recommendation System - Login/Signup Dashboard"""
 import streamlit as st
+
+# MUST be first Streamlit command
+st.set_page_config(page_title="Movie Recommendation System", layout="wide")
+
+# Now import other modules
 from auth import authenticate_user, register_user, init_db
 import base64
 import os
 from pathlib import Path
 from math import ceil
 from PIL import Image, ImageOps
-
-st.set_page_config(page_title="Movie Recommendation System", layout="wide")
 
 
 def get_image_as_base64(image: Image.Image) -> str:

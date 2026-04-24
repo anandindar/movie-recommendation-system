@@ -6,4 +6,4 @@ matplotlib
 requests
 Pillow
 plotly
-mysql-connector-python
+pymongo

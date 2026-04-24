@@ -1,160 +1,140 @@
 """
 User Authentication Module - Handles sign-up, login, and user management
-Using MySQL Workbench for data storage
+Using MongoDB for data storage
 """
 
-import mysql.connector
-from mysql.connector import Error
+from pymongo import MongoClient
+from pymongo.errors import PyMongoError, ServerSelectionTimeoutError, ConnectionFailure
 import hashlib
 import streamlit as st
 import os
+from datetime import datetime
 
-# Load configuration - Priority: Streamlit secrets > Environment variables > config.py (local)
-MYSQL_CONFIG = {
-    'host': 'localhost',
-    'user': 'root',
-    'password': '',
+# Load MongoDB configuration - Priority: Streamlit secrets > Environment variables > config.py (local)
+MONGODB_CONFIG = {
+    'connection_string': 'mongodb+srv://YOUR_USERNAME:YOUR_PASSWORD@cluster0.xxxxx.mongodb.net/?retryWrites=true&w=majority',
     'database': 'movie_recommendation_db',
-    'port': 3306
+    'users_collection': 'users'
 }
 
-# Try Streamlit Cloud connection string first (better for Railway)
+# Try Streamlit Cloud connection string first
 try:
-    if st.secrets and 'MYSQL_CONNECTION_STRING' in st.secrets:
-        conn_str = st.secrets['MYSQL_CONNECTION_STRING']
-        # Parse: mysql://user:password@host:port/database
-        import urllib.parse
-        parsed = urllib.parse.urlparse(conn_str)
-        MYSQL_CONFIG = {
-            'host': parsed.hostname,
-            'user': parsed.username,
-            'password': parsed.password,
-            'database': parsed.path.lstrip('/'),
-            'port': parsed.port or 3306
-        }
-except Exception:
-    pass
-
-# Try Streamlit Cloud individual secrets if connection string not available
-try:
-    if st.secrets and 'MYSQL_HOST' in st.secrets:
-        MYSQL_CONFIG = {
-            'host': st.secrets['MYSQL_HOST'],
-            'user': st.secrets['MYSQL_USER'],
-            'password': st.secrets['MYSQL_PASSWORD'],
-            'database': st.secrets['MYSQL_DATABASE'],
-            'port': st.secrets.get('MYSQL_PORT', 3306)
-        }
+    if st.secrets and 'MONGODB_CONNECTION_STRING' in st.secrets:
+        MONGODB_CONFIG['connection_string'] = st.secrets['MONGODB_CONNECTION_STRING']
+        if 'MONGODB_DATABASE' in st.secrets:
+            MONGODB_CONFIG['database'] = st.secrets['MONGODB_DATABASE']
 except Exception:
     pass
 
 # Try environment variables
-if 'MYSQL_HOST' in os.environ:
-    MYSQL_CONFIG = {
-        'host': os.getenv('MYSQL_HOST'),
-        'user': os.getenv('MYSQL_USER'),
-        'password': os.getenv('MYSQL_PASSWORD'),
-        'database': os.getenv('MYSQL_DATABASE'),
-        'port': int(os.getenv('MYSQL_PORT', 3306))
-    }
+if 'MONGODB_CONNECTION_STRING' in os.environ:
+    MONGODB_CONFIG['connection_string'] = os.getenv('MONGODB_CONNECTION_STRING')
+    if 'MONGODB_DATABASE' in os.environ:
+        MONGODB_CONFIG['database'] = os.getenv('MONGODB_DATABASE')
 
 # Try config.py (local development)
 try:
-    from config import MYSQL_CONFIG as CONFIG_FILE
+    from config import MONGODB_CONFIG as CONFIG_FILE
     # Only use config.py if environment variables weren't set
-    if 'MYSQL_HOST' not in os.environ:
-        MYSQL_CONFIG = CONFIG_FILE
+    if 'MONGODB_CONNECTION_STRING' not in os.environ:
+        MONGODB_CONFIG = CONFIG_FILE
 except ImportError:
     pass
 
-def init_db():
-    """Initialize the MySQL database with users table if it doesn't exist"""
+# MongoDB client instance
+_mongo_client = None
+_mongo_db = None
+
+def get_mongo_db():
+    """Get MongoDB database instance"""
+    global _mongo_client, _mongo_db
+    
     try:
-        # Connect to MySQL without specifying database first
-        conn = mysql.connector.connect(
-            host=MYSQL_CONFIG['host'],
-            user=MYSQL_CONFIG['user'],
-            password=MYSQL_CONFIG['password'],
-            port=MYSQL_CONFIG.get('port', 3306)
-        )
-        cursor = conn.cursor()
-        
-        # Create database if it doesn't exist
-        cursor.execute(f"CREATE DATABASE IF NOT EXISTS {MYSQL_CONFIG['database']}")
-        
-        # Switch to the database
-        cursor.execute(f"USE {MYSQL_CONFIG['database']}")
-        
-        # Create users table if it doesn't exist
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS users (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                username VARCHAR(50) UNIQUE NOT NULL,
-                email VARCHAR(100) UNIQUE NOT NULL,
-                password_hash VARCHAR(255) NOT NULL,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        if _mongo_client is None:
+            # Check if connection string contains placeholder values
+            if 'YOUR_USERNAME' in MONGODB_CONFIG['connection_string'] or 'xxxxx' in MONGODB_CONFIG['connection_string']:
+                raise ConnectionFailure(
+                    "MongoDB Atlas credentials not configured in config.py. "
+                    "Please follow the setup instructions in config.py to get your MongoDB Atlas connection string."
+                )
+            
+            _mongo_client = MongoClient(
+                MONGODB_CONFIG['connection_string'], 
+                serverSelectionTimeoutMS=5000,
+                connectTimeoutMS=10000,
+                retryWrites=True
             )
-        """)
+            # Test connection
+            _mongo_client.admin.command('ping')
         
-        conn.commit()
-        cursor.close()
-        conn.close()
+        if _mongo_db is None:
+            _mongo_db = _mongo_client[MONGODB_CONFIG['database']]
         
-    except Error as e:
-        print(f"❌ Error initializing database: {e}")
-        print(f"Please ensure MySQL is running and credentials in config.py are correct.")
+        return _mongo_db
+    except (ServerSelectionTimeoutError, ConnectionFailure) as e:
+        error_msg = str(e)
+        if 'YOUR_USERNAME' in error_msg or 'Atlas' in error_msg:
+            print(f"❌ MongoDB Configuration Error: {error_msg}")
+        else:
+            print(f"❌ MongoDB Connection Error: {error_msg}")
+        return None
+    except PyMongoError as e:
+        print(f"❌ MongoDB Error: {str(e)}")
+        return None
+
+def close_mongo_connection():
+    """Close MongoDB connection"""
+    global _mongo_client
+    if _mongo_client:
+        _mongo_client.close()
+        _mongo_client = None
+
+def init_db():
+    """Initialize MongoDB with users collection and indexes if it doesn't exist"""
+    try:
+        db = get_mongo_db()
+        if db is None:
+            return False
+        
+        # Get the users collection
+        users_collection = db[MONGODB_CONFIG['users_collection']]
+        
+        # Create unique indexes on username and email
+        users_collection.create_index('username', unique=True)
+        users_collection.create_index('email', unique=True)
+        
+        return True
+    except PyMongoError as e:
+        print(f"Error initializing MongoDB: {e}")
         return False
-    return True
 
 def hash_password(password):
     """Hash a password using SHA-256"""
     return hashlib.sha256(password.encode()).hexdigest()
 
-def get_db_connection():
-    """Get MySQL database connection"""
-    try:
-        return mysql.connector.connect(
-            host=MYSQL_CONFIG['host'],
-            user=MYSQL_CONFIG['user'],
-            password=MYSQL_CONFIG['password'],
-            database=MYSQL_CONFIG['database'],
-            port=MYSQL_CONFIG.get('port', 3306)
-        )
-    except Error as e:
-        st.error(f"❌ Database Connection Error: {str(e)}")
-        return None
-
 def user_exists(username):
     """Check if a username already exists"""
-    conn = get_db_connection()
-    if not conn:
-        return False
-    
     try:
-        cursor = conn.cursor()
-        cursor.execute("SELECT id FROM users WHERE username = %s", (username,))
-        result = cursor.fetchone()
-        cursor.close()
-        conn.close()
-        return result is not None
-    except Error as e:
+        db = get_mongo_db()
+        if db is None:
+            return False
+        
+        users_collection = db[MONGODB_CONFIG['users_collection']]
+        return users_collection.find_one({'username': username}) is not None
+    except PyMongoError as e:
         print(f"Error checking user: {e}")
         return False
 
 def email_exists(email):
     """Check if an email already exists"""
-    conn = get_db_connection()
-    if not conn:
-        return False
-    
     try:
-        cursor = conn.cursor()
-        cursor.execute("SELECT id FROM users WHERE email = %s", (email,))
-        result = cursor.fetchone()
-        cursor.close()
-        conn.close()
-        return result is not None
-    except Error as e:
+        db = get_mongo_db()
+        if db is None:
+            return False
+        
+        users_collection = db[MONGODB_CONFIG['users_collection']]
+        return users_collection.find_one({'email': email}) is not None
+    except PyMongoError as e:
         print(f"Error checking email: {e}")
         return False
 
@@ -182,21 +162,23 @@ def register_user(username, email, password):
     # Hash password and store user
     password_hash = hash_password(password)
     
-    conn = get_db_connection()
-    if not conn:
-        return False, "Database connection error. Please try again."
-    
     try:
-        cursor = conn.cursor()
-        cursor.execute(
-            "INSERT INTO users (username, email, password_hash) VALUES (%s, %s, %s)",
-            (username, email, password_hash)
-        )
-        conn.commit()
-        cursor.close()
-        conn.close()
+        db = get_mongo_db()
+        if db is None:
+            return False, "Database connection error. Please try again."
+        
+        users_collection = db[MONGODB_CONFIG['users_collection']]
+        
+        user_document = {
+            'username': username,
+            'email': email,
+            'password_hash': password_hash,
+            'created_at': datetime.utcnow()
+        }
+        
+        users_collection.insert_one(user_document)
         return True, "Account created successfully! 🎉 Please log in now"
-    except Error as e:
+    except PyMongoError as e:
         return False, f"Registration error: {str(e)}"
 
 def authenticate_user(username, password):
@@ -207,43 +189,45 @@ def authenticate_user(username, password):
     
     password_hash = hash_password(password)
     
-    conn = get_db_connection()
-    if not conn:
-        return False, "Database connection error. Please try again."
-    
     try:
-        cursor = conn.cursor()
-        cursor.execute(
-            "SELECT id, username FROM users WHERE username = %s AND password_hash = %s",
-            (username, password_hash)
-        )
-        result = cursor.fetchone()
-        cursor.close()
-        conn.close()
+        db = get_mongo_db()
+        if db is None:
+            return False, "Database connection error. Please try again."
         
-        if result:
+        users_collection = db[MONGODB_CONFIG['users_collection']]
+        
+        user = users_collection.find_one({
+            'username': username,
+            'password_hash': password_hash
+        })
+        
+        if user:
             return True, "Login successful! 🎉"
         else:
             return False, "Invalid username or password ❌"
-    except Error as e:
+    except PyMongoError as e:
         return False, f"Authentication error: {str(e)}"
 
 def get_user_info(username):
     """Get user information by username"""
-    conn = get_db_connection()
-    if not conn:
-        return None
-    
     try:
-        cursor = conn.cursor()
-        cursor.execute(
-            "SELECT id, username, email, created_at FROM users WHERE username = %s",
-            (username,)
+        db = get_mongo_db()
+        if db is None:
+            return None
+        
+        users_collection = db[MONGODB_CONFIG['users_collection']]
+        
+        user = users_collection.find_one(
+            {'username': username},
+            {'password_hash': 0}  # Exclude password hash from results
         )
-        result = cursor.fetchone()
-        cursor.close()
-        conn.close()
-        return result
-    except Error as e:
+        
+        if user:
+            # Convert ObjectId to string for JSON serialization
+            user['_id'] = str(user['_id'])
+            return user
+        return None
+    except PyMongoError as e:
         print(f"Error getting user info: {e}")
         return None
+

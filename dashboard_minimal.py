@@ -1,12 +1,58 @@
 """Minimize dashboard to test basic functionality"""
 import streamlit as st
-from auth import authenticate_user, register_user, init_db
 
+# MUST be first Streamlit command
 st.set_page_config(page_title="Movie Recommendation System", layout="wide")
+
+# Now import auth module
+from auth import authenticate_user, register_user, init_db, MONGODB_CONFIG, get_mongo_db
+
+# Check MongoDB Configuration
+def check_mongodb_configured():
+    """Check if MongoDB is properly configured"""
+    if 'YOUR_USERNAME' in MONGODB_CONFIG['connection_string'] or 'xxxxx' in MONGODB_CONFIG['connection_string']:
+        return False, "MongoDB not configured"
+    return True, "MongoDB configured"
+
+# Check if MongoDB is configured
+is_configured, config_msg = check_mongodb_configured()
+
+if not is_configured:
+    st.error("🔧 MongoDB Configuration Required")
+    st.markdown("""
+    ### Setup MongoDB Atlas (Free)
+    
+    1. **Go to** https://www.mongodb.com/cloud/atlas
+    2. **Sign Up** for free (512MB storage - enough for development)
+    3. **Create a Cluster** (Shared tier, free)
+    4. **Create Database User** with username & password
+    5. **Whitelist IP** (Network Access)
+    6. **Get Connection String** from "Connect" button
+    7. **Update config.py** with your connection string:
+       - Replace `YOUR_USERNAME` with your username
+       - Replace `YOUR_PASSWORD` with your password  
+       - Replace `cluster0.xxxxx` with your cluster name
+    
+    **Example Connection String:**
+    ```
+    mongodb+srv://moviesapp:MyPassword123@cluster0.a1b2c.mongodb.net/?retryWrites=true&w=majority
+    ```
+    
+    After updating config.py, refresh this page.
+    """)
+    st.stop()
 
 # Init DB
 if "db_initialized" not in st.session_state:
-    init_db()
+    db_result = init_db()
+    if not db_result:
+        st.error("❌ MongoDB Connection Failed")
+        st.info("Please verify:")
+        st.write("- MongoDB Atlas connection string is correct in config.py")
+        st.write("- Username and password are correct")
+        st.write("- Your IP is whitelisted in MongoDB Atlas Network Access")
+        st.write("- The database credentials have been created")
+        st.stop()
     st.session_state.db_initialized = True
 
 # Session state
@@ -46,7 +92,7 @@ if st.session_state.auth_tab == "LOGIN":
         if success:
             st.session_state.logged_in = True
             st.success(msg)
-            st.switch_page("pages/app.py")
+            st.rerun()
         else:
             st.error(msg)
 else:
