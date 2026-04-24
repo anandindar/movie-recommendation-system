@@ -83,33 +83,59 @@ with col2:
 st.divider()
 
 if st.session_state.auth_tab == "LOGIN":
-    st.write("## Login Form")
+    st.write("## 🔐 Login Form")
     username = st.text_input("Username")
     password = st.text_input("Password", type="password")
     
-    if st.button("Login"):
-        success, msg = authenticate_user(username, password)
-        if success:
-            st.session_state.logged_in = True
-            st.success(msg)
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("🔓 Login", use_container_width=True, key="login_btn"):
+            success, msg = authenticate_user(username, password)
+            if success:
+                st.session_state.logged_in = True
+                st.success(msg)
+                st.rerun()
+            else:
+                st.error(msg)
+    
+    with col2:
+        if st.button("↩️ Back", use_container_width=True, key="back_login"):
+            st.session_state.auth_tab = "SIGNUP"
             st.rerun()
-        else:
-            st.error(msg)
+    
+    st.divider()
+    st.markdown("**Don't have an account?**")
+    if st.button("📝 Create Account", use_container_width=True, key="create_account"):
+        st.session_state.auth_tab = "SIGNUP"
+        st.rerun()
 else:
-    st.write("## Sign Up Form")
+    st.write("## 📝 Sign Up Form")
     username = st.text_input("Username", key="su_username")
     email = st.text_input("Email", key="su_email")
     password = st.text_input("Password", key="su_password", type="password")
     confirm = st.text_input("Confirm Password", key="su_confirm", type="password")
     
-    if st.button("Sign Up"):
-        if password != confirm:
-            st.error("Passwords don't match")
-        else:
-            success, msg = register_user(username, email, password)
-            if success:
-                st.success(msg)
-                st.session_state.auth_tab = "LOGIN"
-                st.rerun()
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("✅ Sign Up", use_container_width=True, key="signup_btn"):
+            if password != confirm:
+                st.error("❌ Passwords don't match")
             else:
-                st.error(msg)
+                success, msg = register_user(username, email, password)
+                if success:
+                    st.success(msg)
+                    st.session_state.auth_tab = "LOGIN"
+                    st.rerun()
+                else:
+                    st.error(msg)
+    
+    with col2:
+        if st.button("↩️ Back", use_container_width=True, key="back_signup"):
+            st.session_state.auth_tab = "LOGIN"
+            st.rerun()
+    
+    st.divider()
+    st.markdown("**Already have an account?**")
+    if st.button("🔐 Sign In", use_container_width=True, key="sign_in"):
+        st.session_state.auth_tab = "LOGIN"
+        st.rerun()
