@@ -58,11 +58,13 @@ def get_mongo_db():
                     "Please follow the setup instructions in config.py to get your MongoDB Atlas connection string."
                 )
             
+            # Create connection with proper timeouts for Streamlit Cloud
             _mongo_client = MongoClient(
                 MONGODB_CONFIG['connection_string'], 
-                serverSelectionTimeoutMS=5000,
-                connectTimeoutMS=10000,
-                retryWrites=True
+                serverSelectionTimeoutMS=15000,
+                connectTimeoutMS=20000,
+                socketTimeoutMS=20000,
+                maxIdleTimeMS=45000
             )
             # Test connection
             _mongo_client.admin.command('ping')
