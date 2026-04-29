@@ -245,6 +245,132 @@ def load_links():
 
 links_df = load_links()
 
+# ── Netflix-style Grid Display Function ───────────────────────────────────
+def display_netflix_grid(movies_list, columns=6, show_rating=False):
+    """Display movies in a Netflix-style grid layout
+    
+    Args:
+        movies_list: DataFrame with movie data
+        columns: Number of columns in grid
+        show_rating: Show rating badge if True
+    """
+    if not movies_list:
+        st.info("No movies to display")
+        return
+    
+    # Custom CSS for Netflix-style grid
+    st.markdown("""
+    <style>
+    .netflix-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 15px;
+        padding: 15px 0;
+    }
+    
+    .netflix-card {
+        position: relative;
+        border-radius: 10px;
+        overflow: hidden;
+        background: #1a1f35;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: 2px solid rgba(229, 9, 20, 0.3);
+    }
+    
+    .netflix-card:hover {
+        transform: scale(1.08) translateY(-8px);
+        box-shadow: 0 8px 30px rgba(229, 9, 20, 0.6);
+        border-color: rgba(229, 9, 20, 1);
+        z-index: 100;
+    }
+    
+    .netflix-poster {
+        width: 100%;
+        height: 220px;
+        object-fit: cover;
+        display: block;
+    }
+    
+    .netflix-info {
+        padding: 10px;
+        background: rgba(5, 8, 20, 0.95);
+        min-height: 70px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+    
+    .netflix-title {
+        font-size: 12px;
+        font-weight: 700;
+        color: #ffffff;
+        font-family: 'Poppins', sans-serif;
+        line-height: 1.2;
+        margin: 0;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    
+    .netflix-genre {
+        font-size: 10px;
+        color: #ff74a8;
+        font-weight: 600;
+        margin-top: 4px;
+        margin-bottom: 0;
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    
+    .netflix-rating {
+        display: inline-block;
+        background: linear-gradient(90deg, #e50914 0%, #ff4b5c 100%);
+        color: white;
+        padding: 3px 8px;
+        border-radius: 10px;
+        font-weight: 700;
+        font-size: 9px;
+        margin-top: 5px;
+    }
+    </style>
+    
+    <div class="netflix-grid">
+    """, unsafe_allow_html=True)
+    
+    # Create HTML cards for each movie
+    for _, movie in movies_list.iterrows():
+        try:
+            movie_id = int(movie['movieId'])
+            poster_url = get_poster_url(movie_id)
+        except:
+            poster_url = "https://via.placeholder.com/180x270?text=No+Poster"
+        
+        genres = movie['genres'][:40] + "..." if len(str(movie['genres'])) > 40 else movie['genres']
+        
+        # Build rating badge HTML if show_rating is True
+        rating_html = ""
+        if show_rating and 'avg_rating' in movie:
+            rating_html = f'<div class="netflix-rating">⭐ {movie["avg_rating"]:.1f}</div>'
+        
+        st.markdown(f"""
+        <div class="netflix-card">
+            <img src="{poster_url}" alt="{movie['title']}" class="netflix-poster" onerror="this.src='https://via.placeholder.com/180x270?text=No+Poster'">
+            <div class="netflix-info">
+                <div>
+                    <p class="netflix-title">{movie['title']}</p>
+                    <p class="netflix-genre">{genres}</p>
+                    {rating_html}
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    st.markdown("</div>", unsafe_allow_html=True)
+
 # ── Fetch posters from OMDB API ────────────────────────────────────────────
 @st.cache_data
 def get_poster_url(movie_id):
@@ -412,22 +538,7 @@ elif page == "🎯 Recommendations":
             
             st.markdown('<h3 class="section-header" style="font-size:20px;">✨ Similar Movies You Might Like</h3>', unsafe_allow_html=True)
             
-            cols = st.columns(3)
-            for idx, (_, rec) in enumerate(rec_with_id.iterrows()):
-                with cols[idx % 3]:
-                    try:
-                        movie_id = int(rec['movieId']) if pd.notna(rec['movieId']) else 0
-                        poster_url = get_poster_url(movie_id) if movie_id > 0 else "https://via.placeholder.com/200x300?text=No+Poster"
-                    except:
-                        poster_url = "https://via.placeholder.com/200x300?text=No+Poster"
-                    
-                    st.image(poster_url, use_column_width=True)
-                    st.markdown(f"""
-                    <div style='text-align:center;'>
-                        <h4 style='color:#ffffff; font-family:"Bebas Neue", sans-serif; margin:8px 0 4px 0;'>{rec['title']}</h4>
-                        <p style='color:#ff74a8; font-size:12px; margin:0;'>{rec['genres']}</p>
-                    </div>
-                    """, unsafe_allow_html=True)
+            display_netflix_grid(rec_with_id, columns=6)
 
 # ════════════════════════════════════════════════════════════════════════════
 # PAGE: SEARCH
@@ -466,22 +577,7 @@ elif page == "🔍 Search":
     st.markdown(f"**Found {len(filtered_df)} movie(s)**")
     
     if len(filtered_df) > 0:
-        cols = st.columns(3)
-        for idx, (_, movie) in enumerate(filtered_df.head(12).iterrows()):
-            with cols[idx % 3]:
-                try:
-                    movie_id = int(movie['movieId'])
-                    poster_url = get_poster_url(movie_id)
-                except:
-                    poster_url = "https://via.placeholder.com/200x300?text=No+Poster"
-                
-                st.image(poster_url, use_column_width=True)
-                st.markdown(f"""
-                <div style='text-align:center;'>
-                    <h4 style='color:#ffffff; font-family:"Bebas Neue", sans-serif; margin:8px 0 4px 0;'>{movie['title']}</h4>
-                    <p style='color:#ff74a8; font-size:12px; margin:0;'>{movie['genres']}</p>
-                </div>
-                """, unsafe_allow_html=True)
+        display_netflix_grid(filtered_df.head(30), columns=6)
     else:
         st.info("No movies found. Try a different search term.")
 
@@ -511,24 +607,7 @@ elif page == "⭐ Top Rated":
     top_rated = top_rated.merge(movies_df, on='movieId')
     
     # Display
-    cols = st.columns(3)
-    for idx, (_, movie) in enumerate(top_rated.iterrows()):
-        with cols[idx % 3]:
-            try:
-                movie_id = int(movie['movieId'])
-                poster_url = get_poster_url(movie_id)
-            except:
-                poster_url = "https://via.placeholder.com/200x300?text=No+Poster"
-            
-            st.image(poster_url, use_column_width=True)
-            st.markdown(f"""
-            <div style='text-align:center;'>
-                <h4 style='color:#ffffff; font-family:"Bebas Neue", sans-serif; margin:8px 0 4px 0;'>{movie['title']}</h4>
-                <p style='color:#ff74a8; font-size:12px; margin-bottom:8px;'>{movie['genres']}</p>
-                <div class='rating-badge'>⭐ {movie['avg_rating']:.1f}</div>
-                <p style='color:#a0aec0; font-size:11px; margin-top:8px;'>Based on {int(movie['num_ratings'])} ratings</p>
-            </div>
-            """, unsafe_allow_html=True)
+    display_netflix_grid(top_rated, columns=6, show_rating=True)
 
 # ════════════════════════════════════════════════════════════════════════════
 # PAGE: PROFILE
