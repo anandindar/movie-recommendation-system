@@ -495,12 +495,15 @@ def get_poster_url(movie_id):
 # ── Header Section ────────────────────────────────────────────────────────
 st.markdown("""
 <div style='text-align:center; margin-bottom:32px;'>
-    <h1 style='font-size:48px; font-family:"Bebas Neue", sans-serif; color:#F5F1E8; 
-               background: #000000; padding: 20px 30px; border-radius: 12px;
-               text-shadow:0 2px 8px rgba(0,0,0,0.8); letter-spacing:2px; margin:0;'>
+    <h1 style='font-size:48px; font-family:"Bebas Neue", sans-serif; color:#F5F1E8 !important; 
+               background: #000000 !important; padding: 20px 30px; border-radius: 12px;
+               text-shadow: none !important; letter-spacing:2px; margin:0;
+               -webkit-text-stroke: 0 !important;'>
         🎬 MOVIE ENTERTAINMENT HUB 🎬
     </h1>
-    <p style='color:#F5F1E8; font-size:16px; font-weight:600; margin-top:16px; background: #1a1a1a; padding: 12px 20px; border-radius: 8px; display: inline-block;'>
+    <p style='color:#F5F1E8 !important; font-size:16px; font-weight:600; margin-top:16px; 
+               background: #1a1a1a !important; padding: 12px 20px; border-radius: 8px; 
+               display: inline-block; text-shadow: none !important;'>
         Discover. Rate. Enjoy. Your Personal Movie Journey Starts Here.
     </p>
 </div>
