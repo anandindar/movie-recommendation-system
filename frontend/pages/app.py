@@ -495,11 +495,12 @@ def get_poster_url(movie_id):
 # ── Header Section ────────────────────────────────────────────────────────
 st.markdown("""
 <div style='text-align:center; margin-bottom:32px;'>
-    <h1 style='font-size:48px; font-family:"Bebas Neue", sans-serif; color:#ffffff; 
-               text-shadow:0 3px 15px rgba(229,9,20,0.8); letter-spacing:2px; margin:0;'>
+    <h1 style='font-size:48px; font-family:"Bebas Neue", sans-serif; color:#F5F1E8; 
+               background: #000000; padding: 20px 30px; border-radius: 12px;
+               text-shadow:0 2px 8px rgba(0,0,0,0.8); letter-spacing:2px; margin:0;'>
         🎬 MOVIE ENTERTAINMENT HUB 🎬
     </h1>
-    <p style='color:#ff74a8; font-size:16px; font-weight:600; margin-top:8px;'>
+    <p style='color:#F5F1E8; font-size:16px; font-weight:600; margin-top:16px; background: #1a1a1a; padding: 12px 20px; border-radius: 8px; display: inline-block;'>
         Discover. Rate. Enjoy. Your Personal Movie Journey Starts Here.
     </p>
 </div>
@@ -508,12 +509,12 @@ st.markdown("""
 # Personalized Welcome Section
 user_stats = get_user_stats(st.session_state.username)
 st.markdown(f"""
-<div style='background: linear-gradient(90deg, rgba(229,9,20,0.2) 0%, rgba(229,9,20,0.1) 100%); 
-            border-left: 4px solid #e50914; padding: 16px; border-radius: 8px; margin-bottom: 24px;'>
-    <h3 style='color:#ff74a8; margin: 0 0 8px 0; font-family:"Bebas Neue", sans-serif;'>
-        👋 Welcome Back, <span style='color:#ffffff;'>{st.session_state.username.upper()}</span>!
+<div style='background: #000000; 
+            border-left: 4px solid #F5F1E8; padding: 16px; border-radius: 8px; margin-bottom: 24px;'>
+    <h3 style='color:#F5F1E8; margin: 0 0 8px 0; font-family:"Bebas Neue", sans-serif;'>
+        👋 Welcome Back, <span style='color:#F5F1E8;'>{st.session_state.username.upper()}</span>!
     </h3>
-    <p style='color:#b8c5d6; margin: 4px 0; font-size: 14px;'>
+    <p style='color:#DDD8D0; margin: 4px 0; font-size: 14px;'>
         ⭐ Movies Rated: <strong>{user_stats["rated"]}</strong> | 
         📊 Average Rating: <strong>{user_stats["avg_rating"]}</strong> | 
         🎭 Top Genre: <strong>{user_stats["top_genre"]}</strong>
