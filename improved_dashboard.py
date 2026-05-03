@@ -5,6 +5,7 @@ import plotly.express as px
 from utils import VALID_USERNAME, VALID_PASSWORD
 from pathlib import Path
 import os
+import time
 
 # Page configuration
 st.set_page_config(
@@ -51,6 +52,22 @@ body, html, [data-testid="stAppViewContainer"] {
     box-shadow: 0 12px 40px rgba(0,0,0,0.6), 0 0 30px rgba(229,9,20,0.4);
     border-color: rgba(229, 9, 20, 1);
 }
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.welcome-animation {
+    animation: fadeIn 1s ease-out;
+    text-align: center;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
 
 .movie-title {
     color: var(--text-light);
@@ -175,7 +192,20 @@ body, html, [data-testid="stAppViewContainer"] {
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = True
 if "username" not in st.session_state:
-    st.session_state.username = "Guest User"
+    st.session_state.username = "Guest"
+
+# Add a "wow" moment with an animated welcome message
+st.markdown(f"""
+<div class="welcome-animation">
+    <h2>Welcome back, {st.session_state.username}!</h2>
+    <p>Let's find your next favorite movie.</p>
+</div>
+""", unsafe_allow_html=True)
+
+# Loading spinner for a better UX
+with st.spinner('Initializing your cinematic universe...'):
+    time.sleep(2)  # Simulate a loading process for dramatic effect
+
 
 # ── Check authentication ──────────────────────────────────────────────────
 if not st.session_state.logged_in:
